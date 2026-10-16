@@ -1,0 +1,208 @@
+body {
+  min-height: 100vh;
+  background: #f8f4ee;
+  color: #3f372f;
+  font-family: "Inter", Helvetica, sans-serif;
+}
+
+.completed-page {
+  width: 393px;
+  min-width: 393px;
+  max-width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  padding: 28px 16px 56px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page-header,
+.summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-header {
+  min-height: 42px;
+}
+
+.back-link,
+.brand {
+  color: #a85335;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #3f372f;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.brand-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: #f5e5dc;
+  color: #a85335;
+  font-weight: 800;
+}
+
+.job-summary {
+  padding: 32px 0 24px;
+  border-bottom: 1px solid #e5d9ce;
+}
+
+.eyebrow {
+  margin: 0 0 9px;
+  color: #a85335;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.status-label {
+  flex: 0 0 auto;
+  color: #3e7954;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.job-description {
+  margin: 14px 0 0;
+  color: #554b43;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 14px;
+  color: #71665d;
+  font-size: 12px;
+}
+
+.detail-section {
+  padding: 22px 0;
+  border-bottom: 1px solid #e5d9ce;
+}
+
+h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+
+.people-grid,
+.hours-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.people-grid > div,
+.hours-grid > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  color: #8b7e74;
+  font-size: 11px;
+}
+
+.people-grid strong,
+.hours-grid strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.people-grid a {
+  width: fit-content;
+  color: #a85335;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.hours-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.hours-grid .total-hours {
+  padding: 12px;
+  border-radius: 8px;
+  background: #f1f7ef;
+}
+
+.total-hours strong {
+  color: #365d3d;
+  font-size: 16px;
+}
+
+.completion-note {
+  margin: 0;
+  color: #554b43;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.photo-gallery img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.photo-empty {
+  margin: 0;
+  color: #71665d;
+  font-size: 13px;
+}
+
+@media (max-width: 520px) {
+  .completed-page {
+    width: calc(100% - 32px);
+    padding-top: 20px;
+  }
+
+  .job-summary {
+    padding-top: 26px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .hours-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .photo-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,308 @@
+.payroll-page .payroll-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 16px 0;
+}
+
+.payroll-page .payroll-stat {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #e5d9ce;
+  border-radius: 10px;
+  background: #fffdf9;
+}
+
+.payroll-page .payroll-stat span {
+  color: #71665d;
+  font-size: 11px;
+}
+
+.payroll-page .payroll-stat strong {
+  color: #3f372f;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.payroll-page .payroll-stat-primary {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-color: #d9784f;
+  background: #d9784f;
+}
+
+.payroll-page .payroll-stat-primary span,
+.payroll-page .payroll-stat-primary strong {
+  color: #ffffff;
+}
+
+.payroll-page .payroll-worker-search-control {
+  position: relative;
+}
+
+.payroll-page .payroll-worker-search {
+  box-sizing: border-box;
+  width: 100%;
+  height: 42px;
+  margin: 0 0 8px;
+  padding: 0 36px 0 12px;
+  border: 1px solid #e2d6cb;
+  border-radius: 8px;
+  background: #fffdf9;
+  color: #3f372f;
+  font: inherit;
+  font-size: 13px;
+}
+
+.payroll-page .payroll-search-clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #71665d;
+  font: inherit;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.payroll-page .payroll-search-clear[hidden] {
+  display: none;
+}
+
+.payroll-page .payroll-worker-search:focus-visible {
+  outline: 2px solid #c97855;
+  outline-offset: 2px;
+}
+
+.payroll-page .payroll-worker-search::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+.payroll-page .payroll-search-message {
+  margin: 0;
+  color: #71665d;
+  font-size: 12px;
+}
+
+.payroll-page .payroll-search-message:empty {
+  display: none;
+}
+
+.payroll-page .payroll-worker-card[hidden] {
+  display: none;
+}
+
+.payroll-page .payroll-actions button.is-sent {
+  background-color: #3e7954;
+  color: #ffffff;
+  cursor: default;
+}
+
+.download-payslip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background-color: #d9784f;
+  color: #ffffff !important;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(217, 120, 79, 0.25);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.download-payslip-btn:hover {
+  background-color: #c96d45;
+  transform: translateY(-1px);
+}
+
+.payroll-page .payroll-worker-card {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #e5d9ce;
+  border-radius: 10px;
+  background: #fffdf9;
+}
+
+.payroll-page .payroll-worker-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.payroll-page .payroll-worker-heading h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.payroll-page .payroll-worker-heading p {
+  margin: 5px 0 0;
+  color: #71665d;
+  font-size: 11px;
+}
+
+.payroll-page .payroll-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.payroll-page .payroll-day {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 1px;
+  border-radius: 7px;
+  background: #f8f4ee;
+}
+
+.payroll-page .payroll-day span {
+  color: #71665d;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.payroll-page .payroll-day strong {
+  color: #3f372f;
+  font-size: 8.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.payroll-page .payroll-payslip-summary {
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid #e5d9ce;
+}
+
+.payroll-page .payroll-payslip-summary h3 {
+  margin: 0 0 8px;
+  color: #3f372f;
+  font-size: 12px;
+}
+
+.payroll-page .payroll-summary-table {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+}
+
+.payroll-page .payroll-summary-row {
+  display: grid;
+  grid-template-columns: minmax(43px, 0.9fr) repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  align-items: center;
+  min-width: 0;
+  padding: 7px 1px;
+  border-top: 1px solid #eee5dc;
+}
+
+.payroll-page .payroll-summary-header {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.payroll-page .payroll-summary-header span {
+  color: #71665d;
+  font-size: 7px;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.payroll-page .payroll-summary-header span:first-child {
+  text-align: left;
+}
+
+.payroll-page .payroll-summary-row:not(.payroll-summary-header) span,
+.payroll-page .payroll-summary-row:not(.payroll-summary-header) strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 8px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.payroll-page .payroll-summary-row:not(.payroll-summary-header) > strong:first-child {
+  color: #3f372f;
+  text-align: left;
+}
+
+.payroll-page .payroll-summary-ytd {
+  background: #f8f4ee;
+}
+
+.payroll-page .payroll-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 14px 0 28px;
+  border-top: 1px solid #e5d9ce;
+}
+
+.payroll-page .payroll-actions button {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  background-color: #c97855;
+  color: #ffffff;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(201, 120, 85, 0.25);
+  transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+}
+
+.payroll-page .payroll-actions button:hover:not(:disabled) {
+  background-color: #b86645;
+  transform: translateY(-1px);
+}
+
+.payroll-page .payroll-actions button:disabled:not(.is-sent) {
+  cursor: not-allowed;
+  opacity: 0.55;
+  background-color: #e2d6cb;
+  color: #8b7e74;
+  box-shadow: none;
+  transform: none;
+}
+
+.payroll-page .payroll-actions button.is-sent {
+  background-color: #3e7954 !important;
+  color: #ffffff !important;
+  cursor: default;
+  opacity: 1 !important;
+  box-shadow: 0 4px 14px rgba(62, 121, 84, 0.25);
+}
+
+.payroll-page .payroll-actions p {
+  min-height: 18px;
+  margin: 0;
+  color: #71665d;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
