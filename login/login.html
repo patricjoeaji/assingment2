@@ -1,0 +1,227 @@
+
+   <!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
+
+  <link rel="stylesheet" href="../globals.css">
+  <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+
+<div class="login" data-model-id="13:652">
+
+  <div class="section-login">
+
+    <div class="form-margin">
+
+      <div class="form">
+
+        <!-- Email -->
+        <div class="div">
+
+          <div class="label">
+            <div class="text-wrapper">Email</div>
+          </div>
+
+          <input
+            id="email"
+            class="email-input"
+            type="email"
+            placeholder="name@example.com"
+          >
+
+        </div>
+
+
+        <!-- Password -->
+        <div class="container">
+
+          <div class="div">
+            <div class="text-wrapper">Password</div>
+            <a class="reset-password-link" href="/reset%20password/reset-password.html">Reset password</a>
+          </div>
+
+          <div class="container-margin">
+
+            <div class="container-2">
+
+              <input
+                id="password"
+                class="password-input"
+                type="password"
+                placeholder="Enter your password"
+              >
+
+              <button
+                class="button"
+                type="button"
+                onclick="togglePassword()"
+              >
+                <div class="text-wrapper-3">Show</div>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Sign In -->
+        <div class="button-wrapper">
+
+          <button
+            class="div-wrapper"
+            type="button"
+            onclick="loginUser()"
+          >
+            <div class="text-wrapper-4">Sign in</div>
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Welcome -->
+    <div class="container-3">
+
+      <div class="div">
+        <div class="text-wrapper-5">Welcome back</div>
+      </div>
+
+      <div class="paragraph"></div>
+
+    </div>
+
+
+    <!-- Logo -->
+    <div class="container-4">
+
+      <div class="container-5">
+        <div class="text-wrapper-6">J</div>
+      </div>
+
+      <div class="text">
+        <div class="text-wrapper-7">JobFlow</div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Phone Status -->
+  <div class="container-6">
+
+    <div class="div-wrapper-2">
+      <div class="text-wrapper-8">9:41</div>
+    </div>
+
+    <div class="div-wrapper-2">
+      <div class="text-wrapper-9">●●● Wi-Fi ▰</div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+function togglePassword() {
+
+  const passwordInput = document.getElementById("password");
+  const showButton = document.querySelector(".text-wrapper-3");
+
+  if (passwordInput.type === "password") {
+
+    passwordInput.type = "text";
+    showButton.textContent = "Hide";
+
+  } else {
+
+    passwordInput.type = "password";
+    showButton.textContent = "Show";
+
+  }
+
+}
+
+async function loginUser() {
+  const email = document
+    .getElementById('email')
+    .value
+    .trim()
+    .toLowerCase();
+
+  const password = document
+    .getElementById('password')
+    .value;
+
+  if (!email || !password) {
+    alert('Please enter your email and password.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || 'Unable to sign in.'
+      );
+    }
+
+    sessionStorage.setItem(
+      'currentUser',
+      JSON.stringify(result.user)
+    );
+
+    if (result.user.role === 'Owner') {
+      window.location.href = '/owner-view/owner-view.html';
+      return;
+    }
+
+    if (result.user.role === 'Worker') {
+      window.location.href = '/worker-view/worker-view.html';
+      return;
+    }
+
+    throw new Error('This account has an invalid role.');
+
+  } catch (error) {
+    console.error('Login error:', error);
+    alert(error.message || 'Unable to sign in.');
+  }
+}
+document
+  .getElementById('password')
+  .addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      loginUser();
+    }
+  });
+
+</script>
+
+
+</body>
+</html>

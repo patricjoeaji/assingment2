@@ -1,0 +1,168 @@
+.app-bottom-nav {
+  position: fixed;
+  z-index: 1000;
+  bottom: var(--nav-bottom, 0px);
+  left: var(--nav-left, 0px);
+  display: grid;
+  width: min(var(--nav-width, 393px), 100vw);
+  height: calc(58px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  grid-template-columns: repeat(var(--nav-items, 5), minmax(0, 1fr));
+  align-items: stretch;
+  padding: 0 4px env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid #eadfd5;
+  background: #fffdf9f5;
+}
+
+.worker-view .app-bottom-nav,
+.owner-view .app-bottom-nav {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  width: 100%;
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+.owner-view > .section-9,
+.worker-view > .div > .section {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+
+.app-bottom-nav-item {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #8b7e74;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-bottom-nav-item:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid #d9784f;
+  outline-offset: -3px;
+  border-radius: 6px;
+}
+
+.app-bottom-nav-icon {
+  display: block;
+  min-height: 18px;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+}
+
+.app-bottom-nav-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.app-bottom-nav-label {
+  overflow: hidden;
+  max-width: 100%;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-bottom-nav-item.is-active {
+  color: #d9784f;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-bottom-nav-item {
+    transition: color 120ms ease-out;
+  }
+}
+
+
+
+/* Empty Owner calendar uses the same frame-contained navigation layout. */
+.owner-view-empty .frame {
+  display: flex;
+  flex-direction: column;
+}
+.owner-view-empty .frame > .section {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 100%;
+  height: auto;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
+  box-sizing: border-box;
+}
+.owner-view-empty .frame > .app-bottom-nav {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  width: 100%;
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+/* Desktop retains the 393 x 852 phone preview; mobile follows the viewport. */
+@media (max-width: 600px) {
+  .owner-view,
+  .worker-view,
+  .owner-view-empty {
+    min-height: 0;
+    height: 100vh;
+    height: 100dvh;
+  }
+  .worker-view > .div,
+  .owner-view-empty > .frame {
+    height: 100%;
+    min-height: 0;
+  }
+  .owner-view,
+  .worker-view > .div,
+  .owner-view-empty > .frame {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* On phones, every shared navigation stays at the visible viewport bottom. */
+@media (max-width: 600px) {
+  .app-bottom-nav {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    width: min(393px, 100vw) !important;
+    margin: 0 !important;
+  }
+  .owner-view > .section-9,
+  .worker-view > .div > .section,
+  .owner-view-empty .frame > .section {
+    height: auto !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 24px) !important;
+  }
+  body.has-app-bottom-nav:not(.has-nav-frame) {
+    padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 24px);
+  }
+}

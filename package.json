@@ -1,0 +1,36 @@
+{
+  "name": "assessment-1---job-schedule-",
+  "version": "1.0.0",
+  "description": "A mobile-first web application designed to support job scheduling, allocation and worker management for small trade businesses.",
+  "main": "index.js",
+  "scripts": {
+    "test:worker-creation": "node --test tests/worker-creation.test.js",
+    "test": "node --test --test-reporter=spec tests/*.test.js",
+    "test:worker-status": "node --test tests/worker-status.test.js",
+    "test:account-management": "node --test tests/account-management.test.js",
+    "test:payroll": "node --test --test-reporter=spec tests/payroll.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Krisy-uni/assessment-1---job-schedule-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Krisy-uni/assessment-1---job-schedule-/issues"
+  },
+  "homepage": "https://github.com/Krisy-uni/assessment-1---job-schedule-#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mongoose": "^9.9.4",
+    "multer": "^2.4.0",
+    "nodemailer": "^10.1.0",
+    "pdfkit": "^0.20.2"
+  }
+}
