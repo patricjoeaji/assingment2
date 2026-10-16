@@ -1,0 +1,331 @@
+
+  <!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../globals.css">
+  <link rel="stylesheet" href="create-job.css">
+  <link rel="stylesheet" href="/bottom-nav.css">
+  <script src="/bottom-nav.js" defer></script>
+  <title>Create Job</title>
+</head>
+<body>
+  <div class="create-job" data-model-id="13:665">
+    <div class="section-4">
+
+      <header class="header-4">
+        <button class="button-36" type="button" onclick="window.location.href='/owner-view/owner-view.html'">
+          <div class="text-wrapper-56">‹</div>
+        </button>
+        <div class="bold-text-8">
+          <div class="text-wrapper-57">Create Job</div>
+        </div>
+      </header>
+
+      <div class="form-wrapper">
+        <div class="form-2">
+          <div class="container-27">
+
+            <div class="label-8">
+              <div class="text-wrapper-58">Job title</div>
+              <div class="kitchen-installation-wrapper field-box">
+                <input id="jobTitle" class="dynamic-input" type="text" value="" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="label-margin-7">
+              <div class="label-9">
+                <div class="text-wrapper-58">Description</div>
+                <div class="text-area-2 field-box">
+                  <textarea id="description" class="dynamic-textarea"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="label-margin-8">
+              <div class="label-10">
+                <div class="text-wrapper-58">Date</div>
+                <div class="date-picker field-box picker-box" onclick="openNativePicker('jobDate')">
+                  <input id="jobDate" class="dynamic-input native-picker" type="date" value="">
+                </div>
+              </div>
+            </div>
+
+            <div class="container-margin-11">
+              <div class="container-28">
+                <div class="label-margin-9">
+                  <div class="label-11">
+                    <div class="text-wrapper-58">Start time</div>
+                    <div class="time-picker-3 field-box picker-box" onclick="openNativePicker('startTime')">
+                      <input id="startTime" class="dynamic-input native-picker" type="time" value="">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="label-margin-10">
+                  <div class="label-12">
+                    <div class="text-wrapper-58">Working hours</div>
+                    <div class="time-picker-4 field-box">
+                      <input id="workingHours" class="dynamic-input" type="number" min="0.5" step="0.5" value="" style="padding-left: 12px; box-sizing: border-box;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="label-8">
+              <div class="text-wrapper-58">Street address</div>
+              <div class="text-input-5 field-box">
+                <input id="streetAddress" class="dynamic-input" type="text" value="" autocomplete="street-address">
+              </div>
+            </div>
+
+            <div class="container-margin-12">
+              <div class="container-29">
+                <div class="label-margin-9">
+                  <div class="label-13">
+                    <div class="text-wrapper-58">Suburb</div>
+                    <div class="text-input-6 field-box">
+                      <input id="suburb" class="dynamic-input" type="text" value="" autocomplete="address-level2">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="label-margin-11">
+                  <div class="label-13">
+                    <div class="text-wrapper-58">Postcode</div>
+                    <div class="text-input-7 field-box">
+                      <input id="postcode" class="dynamic-input" type="text" value="" inputmode="numeric" autocomplete="postal-code">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <button class="button-37" type="button" onclick="createJob()">
+            <div class="text-wrapper-61">Create job</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="container-30">
+        <div class="heading-5">
+          <div class="text-wrapper-62">Client contact</div>
+        </div>
+
+        <div class="label-margin-12">
+          <div class="label-8">
+            <div class="text-wrapper-58">Client name</div>
+            <div class="text-input-8 field-box">
+              <input id="clientName" class="dynamic-input" type="text" value="" autocomplete="name">
+            </div>
+          </div>
+        </div>
+
+        <div class="label-margin-13">
+          <div class="label-8">
+            <div class="text-wrapper-58">Client phone</div>
+            <div class="text-input-8 field-box">
+              <input id="clientPhone" class="dynamic-input" type="tel" value="" autocomplete="tel">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="button-38" type="button" onclick="createJob()">
+        <div class="text-wrapper-63">Create Job</div>
+      </button>
+    </div>
+
+    <div class="frame-4">
+      <div class="div-wrapper-7"><div class="text-wrapper-64">9:41</div></div>
+      <div class="div-wrapper-7"><div class="text-wrapper-65">●●● Wi‑Fi ▰</div></div>
+    </div>
+
+    <div class="navigation-4">
+      <div class="button-39" onclick="window.location.href='/owner-view/owner-view.html'">
+        <div class="text-wrapper-66">▣</div>
+        <div class="text-wrapper-67">Calendar</div>
+      </div>
+      <div class="button-40">
+        <div class="text-wrapper-68">▤</div>
+        <div class="text-wrapper-69">Jobs</div>
+      </div>
+      <div class="button-41">
+        <div class="text-wrapper-68">♙</div>
+        <div class="text-wrapper-69">Workers</div>
+      </div>
+      <div class="button-42">
+        <div class="text-wrapper-68">☰</div>
+        <div class="text-wrapper-69">Menu</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (e) {
+      currentUser = null;
+    }
+    if (!currentUser || currentUser.role !== 'Owner') {
+      if (currentUser && currentUser.role === 'Worker') {
+        window.location.href = '/worker-view/worker-view.html';
+      } else {
+        window.location.href = '/login/login.html';
+      }
+    }
+
+    function getValue(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function getFieldBox(id) {
+      const element = document.getElementById(id);
+      return element ? element.closest('.field-box') : null;
+    }
+
+    function setInvalid(id, invalid) {
+      const box = getFieldBox(id);
+      if (!box) return;
+      box.classList.toggle('invalid-field', invalid);
+    }
+
+    function clearValidation() {
+      [
+        'jobTitle',
+        'jobDate',
+        'startTime',
+        'workingHours',
+        'streetAddress',
+        'suburb',
+        'postcode',
+        'clientName',
+        'clientPhone'
+      ].forEach(id => setInvalid(id, false));
+    }
+
+    function updatePickerVisibility(input) {
+      input.classList.toggle('has-value', Boolean(input.value));
+    }
+
+    function openNativePicker(id) {
+      const input = document.getElementById(id);
+      if (!input) return;
+
+      input.focus();
+
+      if (typeof input.showPicker === 'function') {
+        try {
+          input.showPicker();
+        } catch (error) {
+          // Browser can still open the native picker through the focused input.
+        }
+      }
+    }
+
+    function calculateEndTime(startTime, hours) {
+      const [hour, minute] = startTime.split(':').map(Number);
+      const totalMinutes = (hour * 60) + minute + Math.round(hours * 60);
+
+      const endHour = Math.floor(totalMinutes / 60) % 24;
+      const endMinute = totalMinutes % 60;
+
+      return `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+    }
+
+    async function createJob() {
+      clearValidation();
+
+      const title = getValue('jobTitle');
+      const description = getValue('description');
+      const date = getValue('jobDate');
+      const startTime = getValue('startTime');
+      const workingHoursRaw = getValue('workingHours');
+      const workingHours = Number(workingHoursRaw);
+      const streetAddress = getValue('streetAddress');
+      const suburb = getValue('suburb');
+      const postcode = getValue('postcode');
+      const clientName = getValue('clientName');
+      const clientPhone = getValue('clientPhone');
+
+      const requiredFields = {
+        jobTitle: title,
+        jobDate: date,
+        startTime: startTime,
+        workingHours: workingHoursRaw,
+        streetAddress: streetAddress,
+        suburb: suburb,
+        postcode: postcode,
+        clientName: clientName,
+        clientPhone: clientPhone
+      };
+
+      let hasError = false;
+
+      Object.entries(requiredFields).forEach(([id, value]) => {
+        const invalid = !value;
+        setInvalid(id, invalid);
+        if (invalid) hasError = true;
+      });
+
+      if (!Number.isFinite(workingHours) || workingHours <= 0) {
+        setInvalid('workingHours', true);
+        hasError = true;
+      }
+
+      if (hasError) {
+        alert('Please complete all required fields.');
+        return;
+      }
+
+      const jobData = {
+        title,
+        description,
+        date,
+        startTime,
+        endTime: calculateEndTime(startTime, workingHours),
+        location: `${streetAddress}, ${suburb} ${postcode}`,
+        clientName,
+        clientPhone,
+        status: 'Pending',
+        assignedWorker: null
+      };
+
+      try {
+        const response = await fetch('/api/jobs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(jobData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to create job');
+        }
+
+        window.location.href =
+          `/allocate%20worker/allocate-worker.html?id=${encodeURIComponent(result._id)}`;
+
+      } catch (error) {
+        console.error('Create job error:', error);
+        alert('Unable to create job. Please check that the server and MongoDB are running.');
+      }
+    }
+
+    document.querySelectorAll('.native-picker').forEach(input => {
+      updatePickerVisibility(input);
+      input.addEventListener('change', () => updatePickerVisibility(input));
+      input.addEventListener('input', () => updatePickerVisibility(input));
+      input.addEventListener('click', event => event.stopPropagation());
+    });
+  </script>
+</body>
+</html>
