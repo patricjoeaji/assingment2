@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payroll | JobFlow</title>
+  <link rel="stylesheet" href="globals.css">
+  <link rel="stylesheet" href="owner-view/owner-view.css">
+  <link rel="stylesheet" href="timesheets.css">
+  <link rel="stylesheet" href="payroll.css">
+  <link rel="stylesheet" href="bottom-nav.css">
+  <script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="owner-view">
+  <div class="container-57">
+    <div class="div-wrapper-13"><div class="text-wrapper-124">9:41</div></div>
+    <div class="div-wrapper-13"><div class="text-wrapper-125">●●● Wi‑Fi ▰</div></div>
+  </div>
+
+  <main class="timesheets-page payroll-page">
+    <header class="page-header">
+      <a class="schedule-link" href="/owner-view/owner-view.html">&larr; Schedule</a>
+      <a class="brand" href="/owner-view/owner-view.html" aria-label="JobFlow schedule">
+        <span class="brand-mark">J</span>
+        <span>JobFlow</span>
+      </a>
+    </header>
+
+    <div class="page-title-row">
+      <div>
+        <h1>Payroll</h1>
+        <p id="week-label">Loading week...</p>
+      </div>
+      <div class="week-controls" aria-label="Choose week">
+        <input id="week-date" type="date" aria-label="Week containing date">
+      </div>
+    </div>
+
+    <section class="timesheet-section" aria-label="Weekly payroll summary">
+      <div class="payroll-summary" aria-live="polite">
+        <div class="payroll-stat payroll-stat-primary">
+          <span>Total Gross Pay</span>
+          <strong id="gross-pay">--</strong>
+        </div>
+        <div class="payroll-stat">
+          <span>Approved hours</span>
+          <strong id="approved-hours">--</strong>
+        </div>
+        <div class="payroll-stat">
+          <span>Workers</span>
+          <strong id="worker-count">0</strong>
+        </div>
+      </div>
+      <div class="payroll-worker-search-control">
+        <input class="payroll-worker-search" id="payroll-worker-search" type="search" aria-label="Search workers" placeholder="Search workers">
+        <button class="payroll-search-clear" id="payroll-search-clear" type="button" aria-label="Clear worker search" title="Clear search" hidden>×</button>
+      </div>
+      <p class="payroll-search-message" id="payroll-search-message" role="status" aria-live="polite"></p>
+      <p class="list-message" id="list-message" role="status" aria-live="polite">Loading payroll...</p>
+      <div class="payroll-list" id="payroll-list"></div>
+      <div class="payroll-actions">
+        <button class="primary-button" id="generate-payslips" type="button" disabled>Generate Payslips</button>
+        <p id="payslip-send-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <div class="navigation-6"></div>
+</div>
+
+  <dialog class="confirm-dialog" id="payslip-confirm-dialog" aria-labelledby="payslip-dialog-title">
+    <div class="dialog-content">
+      <p class="dialog-eyebrow">PAYSLIP GENERATION</p>
+      <h2 id="payslip-dialog-title" style="margin: 0; font-size: 18px; color: #3d352f;">Payslips Generated</h2>
+      <p style="margin: 10px 0 0; color: #554b43; font-size: 13px; line-height: 1.5;">Payslips have been generated. Are you sure you want to push them directly to workers in their app?</p>
+      <div class="dialog-actions" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+        <button class="secondary-button" id="cancel-send-payslips" type="button">Cancel</button>
+        <button class="primary-button" id="confirm-send-payslips" type="button" style="min-height: 38px; height: 38px; padding: 0 16px;">Confirm &amp; Push</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (error) {
+      currentUser = null;
+    }
+
+    if (!currentUser || currentUser.role !== 'Owner') {
+      if (currentUser && currentUser.role === 'Worker') {
+        window.location.href = '/worker-view/worker-view.html';
+      } else {
+        window.location.href = '/login/login.html';
+      }
+    }
+
+    const weekDateInput = document.getElementById('week-date');
+    const weekLabel = document.getElementById('week-label');
+    const listMessage = document.getElementById('list-message');
+    const payrollList = document.getElementById('payroll-list');
+    const workerSearchInput = document.getElementById('payroll-worker-search');
+    const workerSearchClear = document.getElementById('payroll-search-clear');
+    const payrollSearchMessage = document.getElementById('payroll-search-message');
+    const generatePayslipsButton = document.getElementById('generate-payslips');
+    const payslipSendStatus = document.getElementById('payslip-send-status');
+    let weekStartDate = startOfWeek(new Date());
+    let canGeneratePayslips = false;
+
+    function startOfWeek(date) {
+      const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+      return start;
+    }
+
+    function formatDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDate(value) {
+      return new Date(`${value}T00:00:00`).toLocaleDateString('en-AU', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function formatDuration(totalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (!hours) return `${minutes} min`;
+      return minutes ? `${hours} hr ${minutes} min` : `${hours} hr`;
+    }
+
+    function formatDayHours(totalMinutes) {
+      if (!totalMinutes || totalMinutes <= 0) return '0 h';
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = Math.round(totalMinutes % 60);
+      if (!hours) return `${minutes}min`;
+      if (!minutes) return `${hours} h`;
+      return `${hours} h ${minutes}min`;
+    }
+
+    function formatRate(value) {
+      if (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) return 'Not set';
+      return `${formatCurrency(Number(value))}/hr`;
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('en-AU', {
+        style: 'currency',
+        currency: 'AUD'
+      }).format(value);
+    }
+
+    function hasRate(value) {
+      return value !== null && value !== undefined && value !== '' &&
+        Number.isFinite(Number(value)) && Number(value) >= 0;
+    }
+
+    function calculateWeeklyTax(weeklyGross, taxYearStart) {
+      const annualIncome = Math.max(0, Number(weeklyGross) || 0) * 52;
+      const taxYear = Number(String(taxYearStart).slice(0, 4));
+      const firstTaxRate = taxYear >= 2026 ? 0.15 : taxYear >= 2024 ? 0.16 : 0.19;
+      const brackets = taxYear >= 2024
+        ? [
+          { limit: 18200, rate: 0 },
+          { limit: 45000, rate: firstTaxRate },
+          { limit: 135000, rate: 0.30 },
+          { limit: 190000, rate: 0.37 },
+          { limit: Infinity, rate: 0.45 }
+        ]
+        : [
+          { limit: 18200, rate: 0 },
+          { limit: 45000, rate: firstTaxRate },
+          { limit: 120000, rate: 0.325 },
+          { limit: 180000, rate: 0.37 },
+          { limit: Infinity, rate: 0.45 }
+        ];
+      let tax = 0;
+      let lowerLimit = 0;
+
+      for (const bracket of brackets) {
+        tax += Math.max(0, Math.min(annualIncome, bracket.limit) - lowerLimit) * bracket.rate;
+        lowerLimit = bracket.limit;
+        if (annualIncome <= bracket.limit) break;
+      }
+
+      return Math.round((tax / 52 + Number.EPSILON) * 100) / 100;
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function filterPayrollWorkers() {
+      const query = workerSearchInput.value.trim().toLowerCase();
+      const cards = [...payrollList.querySelectorAll('.payroll-worker-card')];
+      let visibleCount = 0;
+      workerSearchClear.hidden = !query;
+
+      cards.forEach(card => {
+        const matches = card.dataset.workerName.includes(query);
+        card.hidden = !matches;
+        if (matches) visibleCount += 1;
+      });
+
+      payrollSearchMessage.textContent = query && cards.length && !visibleCount
+        ? 'No workers match your search.'
+        : '';
+    }
+
+    async function loadPayroll() {
+      listMessage.textContent = 'Loading payroll...';
+      payrollList.replaceChildren();
+      payrollSearchMessage.textContent = '';
+      generatePayslipsButton.disabled = true;
+      payslipSendStatus.textContent = '';
+      weekDateInput.value = formatDateKey(weekStartDate);
+
+      try {
+        const weekStart = formatDateKey(weekStartDate);
+        const weekEndDate = new Date(weekStartDate);
+        weekEndDate.setDate(weekEndDate.getDate() + 6);
+        const through = formatDateKey(weekEndDate);
+        const [timesheetsResponse, workersResponse, ytdResponse] = await Promise.all([
+          fetch(`/api/timesheets?weekStart=${weekStart}`),
+          fetch('/api/workers'),
+          fetch(`/api/payroll/ytd?through=${through}`)
+        ]);
+        const [timesheets, workers, ytdPayroll] = await Promise.all([
+          timesheetsResponse.json(),
+          workersResponse.json(),
+          ytdResponse.json()
+        ]);
+        if (!timesheetsResponse.ok) throw new Error(timesheets.message || 'Unable to load payroll.');
+        if (!workersResponse.ok) throw new Error(workers.message || 'Unable to load worker rates.');
+        if (!ytdResponse.ok) throw new Error(ytdPayroll.message || 'Unable to load YTD payroll.');
+
+        weekStartDate = new Date(`${timesheets.weekStart}T00:00:00`);
+        const taxYearStart = ytdPayroll.yearStart;
+        weekLabel.textContent = `${formatDate(timesheets.weekStart)} – ${formatDate(timesheets.weekEnd)}`;
+
+        const workersByName = new Map(workers.map(worker => [worker.name, worker]));
+        const ratesByName = new Map(workers.map(worker => [worker.name, worker.hourlyRate]));
+        const ytdByName = new Map(ytdPayroll.workers.map(worker => [worker.name, worker]));
+        const approvedJobs = timesheets.jobs.filter(job => job.hoursApprovalStatus === 'Approved');
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const payrollByWorker = new Map();
+
+        approvedJobs.forEach(job => {
+          const workerName = job.assignedWorker || 'Unassigned';
+          const worker = payrollByWorker.get(workerName) || {
+            days: Array(7).fill(0),
+            minutes: 0,
+            jobs: 0,
+            hourlyRate: ratesByName.get(workerName),
+            lines: []
+          };
+          const jobDate = new Date(`${job.date}T00:00:00`);
+          const dayIndex = (jobDate.getDay() + 6) % 7;
+          const jobMinutes = job.approvedTotalMinutes === null
+            ? 0
+            : Math.max(0, Number(job.approvedTotalMinutes) || 0);
+
+          worker.days[dayIndex] += jobMinutes;
+          worker.minutes += jobMinutes;
+          worker.jobs += 1;
+          const hourlyRate = job.approvedHourlyRate ?? worker.hourlyRate;
+          const amount = jobMinutes === 0
+            ? 0
+            : hasRate(hourlyRate)
+            ? Math.round((jobMinutes / 60) * Number(hourlyRate) * 100) / 100
+            : null;
+          worker.lines.push({
+            title: job.title,
+            date: job.date,
+            day: days[dayIndex],
+            minutes: jobMinutes,
+            rate: hourlyRate,
+            amount
+          });
+          payrollByWorker.set(workerName, worker);
+        });
+
+        const entries = [...payrollByWorker.entries()]
+          .sort(([first], [second]) => first.localeCompare(second));
+        const totalMinutes = entries.reduce((total, [, worker]) => total + worker.minutes, 0);
+        const missingRate = entries.some(([, worker]) =>
+          worker.minutes > 0 && worker.lines.some(line => line.amount === null)
+        );
+        const payableWorkers = entries.filter(([, worker]) => worker.minutes > 0);
+        const missingYtdRate = payableWorkers.some(([name]) => ytdByName.get(name)?.gross === null);
+        const grossPay = entries.reduce((total, [, worker]) =>
+          total + worker.lines.reduce((workerTotal, line) => workerTotal + (line.amount ?? 0), 0), 0);
+        document.getElementById('gross-pay').textContent = missingRate
+          ? 'Rate needed'
+          : formatCurrency(grossPay);
+        document.getElementById('approved-hours').textContent = formatDuration(totalMinutes);
+        document.getElementById('worker-count').textContent = String(entries.length);
+
+        canGeneratePayslips = payableWorkers.length > 0 && !missingRate && !missingYtdRate;
+        const isAllSent = approvedJobs.length > 0 && approvedJobs.every(j => Boolean(j.payslipSentAt));
+        if (isAllSent) {
+          generatePayslipsButton.textContent = 'Payslips Sent';
+          generatePayslipsButton.disabled = true;
+          generatePayslipsButton.classList.add('is-sent');
+        } else {
+          generatePayslipsButton.textContent = 'Generate Payslips';
+          generatePayslipsButton.classList.remove('is-sent');
+          generatePayslipsButton.disabled = !canGeneratePayslips;
+        }
+
+        if (payableWorkers.length === 0) {
+          payslipSendStatus.textContent = 'No approved payable hours for this week.';
+        } else if (isAllSent) {
+          payslipSendStatus.textContent = 'Payslips for this week have been pushed to workers in the app.';
+        } else if (missingRate) {
+          payslipSendStatus.textContent = 'Set an hourly rate for each worker before generating payslips.';
+        } else if (missingYtdRate) {
+          payslipSendStatus.textContent = 'Set rates for historical approved hours before generating payslips.';
+        }
+
+        payrollList.innerHTML = entries.map(([name, worker]) => `
+          ${(() => {
+            const workerGross = worker.lines.some(line => line.amount === null)
+              ? null
+              : worker.lines.reduce((total, line) => total + line.amount, 0);
+            const netPay = workerGross === null
+              ? null
+              : Math.max(0, Math.round((workerGross - calculateWeeklyTax(workerGross, taxYearStart) + Number.EPSILON) * 100) / 100);
+            const currentTax = workerGross === null ? null : calculateWeeklyTax(workerGross, taxYearStart);
+            const currentSuper = workerGross === null
+              ? null
+              : Math.round((workerGross * 0.12 + Number.EPSILON) * 100) / 100;
+            const prior = ytdByName.get(name) || {
+              minutes: 0,
+              gross: 0,
+              superAmount: 0,
+              tax: 0,
+              rate: worker.hourlyRate
+            };
+            const ytdMinutes = prior.minutes + worker.minutes;
+            const ytdGross = workerGross === null || prior.gross === null
+              ? null
+              : prior.gross + workerGross;
+            const ytdSuper = currentSuper === null || prior.superAmount === null
+              ? null
+              : prior.superAmount + currentSuper;
+            const ytdTax = currentTax === null || prior.tax === null
+              ? null
+              : prior.tax + currentTax;
+            const ytdNetPay = ytdGross === null || ytdTax === null
+              ? null
+              : Math.max(0, ytdGross - ytdTax);
+            const currentRate = worker.minutes > 0 && workerGross !== null
+              ? workerGross / (worker.minutes / 60)
+              : worker.hourlyRate;
+            const ytdRate = ytdMinutes > 0 && ytdGross !== null
+              ? ytdGross / (ytdMinutes / 60)
+              : prior.rate;
+
+            return `
+          <article class="payroll-worker-card" data-worker-name="${escapeHtml(name.toLowerCase())}">
+            <header class="payroll-worker-heading">
+              <div>
+                <h2>${escapeHtml(name)}</h2>
+              </div>
+            </header>
+            <div class="payroll-week-grid" aria-label="Daily approved hours for ${escapeHtml(name)}">
+              ${days.map((day, index) => `
+                <div class="payroll-day">
+                  <span>${day}</span>
+                  <strong>${formatDayHours(worker.days[index])}</strong>
+                </div>
+              `).join('')}
+            </div>
+            <section class="payroll-payslip-summary" aria-label="Payroll summary for ${escapeHtml(name)}">
+              <h3>Summary</h3>
+              <div class="payroll-summary-table" role="table" aria-label="Current and year-to-date payroll values">
+                <div class="payroll-summary-row payroll-summary-header" role="row">
+                  <span></span><span>Hours</span><span>Rate/hr</span><span>Super 12%</span><span>Gross</span><span>Tax</span><span>Net Pay</span>
+                </div>
+                <div class="payroll-summary-row" role="row">
+                  <strong>Current</strong>
+                  <span>${escapeHtml(formatDuration(worker.minutes))}</span>
+                  <span>${escapeHtml(hasRate(currentRate) ? formatCurrency(Number(currentRate)) : 'Not set')}</span>
+                  <span>${currentSuper === null ? 'Rate needed' : escapeHtml(formatCurrency(currentSuper))}</span>
+                  <span>${workerGross === null ? 'Rate needed' : escapeHtml(formatCurrency(workerGross))}</span>
+                  <span>${currentTax === null ? 'Rate needed' : escapeHtml(formatCurrency(currentTax))}</span>
+                  <strong>${netPay === null ? 'Rate needed' : escapeHtml(formatCurrency(netPay))}</strong>
+                </div>
+                <div class="payroll-summary-row payroll-summary-ytd" role="row">
+                  <strong>YTD</strong>
+                  <span>${escapeHtml(formatDuration(ytdMinutes))}</span>
+                  <span>${escapeHtml(hasRate(ytdRate) ? formatCurrency(Number(ytdRate)) : 'Not set')}</span>
+                  <span>${ytdSuper === null ? 'Rate needed' : escapeHtml(formatCurrency(ytdSuper))}</span>
+                  <span>${ytdGross === null ? 'Rate needed' : escapeHtml(formatCurrency(ytdGross))}</span>
+                  <span>${ytdTax === null ? 'Rate needed' : escapeHtml(formatCurrency(ytdTax))}</span>
+                  <strong>${ytdNetPay === null ? 'Rate needed' : escapeHtml(formatCurrency(ytdNetPay))}</strong>
+                </div>
+              </div>
+            </section>
+          </article>
+            `;
+          })()}
+        `).join('');
+        filterPayrollWorkers();
+        listMessage.textContent = entries.length ? '' : 'No approved hours for this week.';
+      } catch (error) {
+        listMessage.textContent = error.message;
+        canGeneratePayslips = false;
+        generatePayslipsButton.disabled = true;
+      }
+    }
+
+    const payslipConfirmDialog = document.getElementById('payslip-confirm-dialog');
+    const cancelSendPayslips = document.getElementById('cancel-send-payslips');
+    const confirmSendPayslips = document.getElementById('confirm-send-payslips');
+
+    generatePayslipsButton.addEventListener('click', () => {
+      if (!canGeneratePayslips) return;
+      if (typeof payslipConfirmDialog.showModal === 'function') {
+        payslipConfirmDialog.showModal();
+      } else {
+        payslipConfirmDialog.setAttribute('open', '');
+      }
+    });
+
+    cancelSendPayslips.addEventListener('click', () => {
+      if (typeof payslipConfirmDialog.close === 'function') {
+        payslipConfirmDialog.close();
+      } else {
+        payslipConfirmDialog.removeAttribute('open');
+      }
+    });
+
+    confirmSendPayslips.addEventListener('click', async () => {
+      if (typeof payslipConfirmDialog.close === 'function') {
+        payslipConfirmDialog.close();
+      } else {
+        payslipConfirmDialog.removeAttribute('open');
+      }
+
+      generatePayslipsButton.disabled = true;
+      generatePayslipsButton.textContent = 'Sending Payslips...';
+      payslipSendStatus.textContent = '';
+
+      try {
+        const response = await fetch('/api/payroll/send-payslips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ weekStart: formatDateKey(weekStartDate) })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.message || 'Unable to send payslips.');
+        payslipSendStatus.textContent = result.message;
+        await loadPayroll();
+      } catch (error) {
+        payslipSendStatus.textContent = error.message;
+        generatePayslipsButton.textContent = 'Generate Payslips';
+        generatePayslipsButton.disabled = !canGeneratePayslips;
+      }
+    });
+
+    weekDateInput.addEventListener('change', () => {
+      if (!weekDateInput.value) return;
+      weekStartDate = startOfWeek(new Date(`${weekDateInput.value}T00:00:00`));
+      loadPayroll();
+    });
+
+    workerSearchInput.addEventListener('input', filterPayrollWorkers);
+    workerSearchClear.addEventListener('click', () => {
+      workerSearchInput.value = '';
+      filterPayrollWorkers();
+      workerSearchInput.focus();
+    });
+
+    if (currentUser && currentUser.role === 'Owner') loadPayroll();
+  </script>
+</body>
+</html>

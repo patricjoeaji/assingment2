@@ -1,0 +1,764 @@
+
+    <!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8" />
+  <link rel="stylesheet" href="../globals.css">
+<link rel="stylesheet" href="worker-view.css">
+<link rel="stylesheet" href="/bottom-nav.css">
+<script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="worker-view" data-model-id="13:661"><div class="div" ><div class="container" ><div class="div-wrapper" ><div class="text-wrapper" >9:41</div></div>
+<div class="div-wrapper" ><div class="text-wrapper-2" >●●● Wi‑Fi ▰</div></div></div>
+<div class="section" ><header class="header" ><button class="button" ><div class="text-wrapper-3" >☰</div></button>
+<div class="bold-text" ><div class="text-wrapper-4" id="viewTitle">Calendar</div></div>
+<button class="button-2" ><div class="text-wrapper-5" >♢</div></button></header>
+<div class="container-margin" id="calendarRangeRow" ><div class="container-2" ><button class="button-3" ><div class="text-wrapper-5" >‹</div></button>
+<div class="bold-text-2" >
+    
+    <p class="p" id="dateRange">1 Sep – 14 Sep, 2026</p>
+
+</div>
+<button class="button-4" ><div class="text-wrapper-5" >›</div></button>
+
+</div></div>
+<div class="container-margin" id="calendarDaysRow" ><div class="container-3" ><div class="container-4" ><div class="text" ><div class="text-wrapper-6" >MON</div></div>
+<div class="text-2" ><div class="text-wrapper-6" >TUE</div></div>
+<div class="text-3" ><div class="text-wrapper-6" >WED</div></div>
+<div class="text-4" ><div class="text-wrapper-6" >THU</div></div>
+<div class="text-5" ><div class="text-wrapper-6" >FRI</div></div>
+<div class="text-6" ><div class="text-wrapper-6" >SAT</div></div>
+<div class="text-7" ><div class="text-wrapper-6" >SUN</div></div></div>
+
+<div class="container-wrapper"><div class="container-5" id="calendarDays">
+
+    <button class="button-5" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-7" >12</div></div></div>
+<div class="text-9" ></div></button>
+<button class="button-6" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-7" >13</div></div></div>
+<div class="text-10" ></div></button>
+<button class="button-7" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-8" >14</div></div></div>
+<div class="text-11" ><div class="italic-text" ></div></div></button>
+<button class="button-8" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-7" >15</div></div></div>
+<div class="text-11" ><div class="italic-text" ></div></div></button>
+<button class="button-9" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-7" >16</div></div></div>
+<div class="text-11" ><div class="italic-text-2" ></div></div></button>
+<button class="button-10" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-7" >17</div></div></div>
+<div class="text-10" ></div></button>
+<button class="button-11" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-7" >18</div></div></div>
+<div class="text-11" ><div class="italic-text" ></div></div></button>
+<button class="button-12" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-7" >19</div></div></div>
+<div class="italic-text-wrapper" ><div class="italic-text-2" ></div></div></button>
+<button class="button-13" ><div class="text-margin" ><div class="text-12" ><div class="text-wrapper-9" >20</div></div></div>
+<div class="text-11" ><div class="italic-text-3" ></div>
+<div class="italic-text" ></div></div></button>
+<button class="button-14" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-7" >21</div></div></div>
+<div class="text-11" ><div class="italic-text" ></div></div></button>
+<button class="button-15" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-10" >22</div></div></div>
+<div class="text-11" ><div class="italic-text-3" ></div></div></button>
+<button class="button-16" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-10" >23</div></div></div>
+<div class="text-11" ><div class="italic-text" ></div></div></button>
+<button class="button-17" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-10" >24</div></div></div>
+<div class="text-11" ><div class="italic-text" ></div></div></button>
+<button class="button-18" ><div class="text-margin" ><div class="text-8" ><div class="text-wrapper-10" >25</div></div></div>
+<div class="text-11" ><div class="italic-text-2" ></div></div></button></div></div></div></div>
+
+<div class="container-margin" id="summaryCardRow">
+  <div class="container-6">
+
+    <div class="container-7" data-status-filter="pending" role="button" tabindex="0" title="Filter Pending jobs">
+      <div class="text-13">
+        <div class="italic-text-4"></div>
+        <div class="text-wrapper-11">Pending</div>
+      </div>
+      <div class="text-wrapper-12" id="pendingCount">0</div>
+    </div>
+
+    <div class="container-8" data-status-filter="accepted" role="button" tabindex="0" title="Filter Accepted jobs">
+      <div class="text-14">
+        <div class="italic-text-5"></div>
+        <div class="text-wrapper-11">Accepted</div>
+      </div>
+      <div class="text-wrapper-12" id="acceptedCount">0</div>
+    </div>
+
+    <div class="container-9" data-status-filter="declined" role="button" tabindex="0" title="Filter Declined jobs">
+      <div class="text-15">
+        <div class="italic-text-6"></div>
+        <div class="text-wrapper-11">Declined</div>
+      </div>
+      <div class="text-wrapper-12" id="declinedCount">0</div>
+    </div>
+
+    <div class="container-finished" data-status-filter="finished" role="button" tabindex="0" title="Filter Finished jobs">
+      <div class="text-finished">
+        <div class="finished-stat-dot"></div>
+        <div class="text-wrapper-11">Finished</div>
+      </div>
+      <div class="text-wrapper-12" id="finishedCount">0</div>
+    </div>
+
+    <div class="container-10" data-status-filter="all" role="button" tabindex="0" title="Filter All jobs">
+      <div class="text-wrapper-13">Total jobs</div>
+      <div class="text-wrapper-12" id="totalCount">0</div>
+    </div>
+
+  </div>
+</div>
+
+
+<div class="container-11">
+  <div class="div-wrapper-2">
+    <div class="text-wrapper-14" id="selectedDateTitle">Loading...</div>
+  </div>
+
+  <div class="div-wrapper-2">
+    <div class="text-wrapper-15" id="selectedJobCount">0 jobs</div>
+  </div>
+</div>
+<div class="container-margin-2"><div class="container-12" id="jobList">
+    
+    <div class="button-19" ><div class="container-13" ><div class="frame" ><div class="text-16" ><div class="text-wrapper-16" >Decline</div></div></div>
+<div class="text-17" ></div>
+<div class="frame-2" ><div class="text-18" ><div class="text-wrapper-16" >Accept</div></div></div></div></div>
+<div class="button-20" ><div class="container-14" ><div class="container-15" ><div class="container-16" ><div class="text-wrapper-17" >Yard Clean-up</div></div>
+<div class="element-pm-pm-wrapper" ><p class="text-wrapper-18" >12:30 pm – 3:00 pm (2.5 hrs)<br/>Ashgrove 4060&nbsp;&nbsp; <br/>Sarah Johnson</p></div></div>
+<div class="text-19" ><div class="text-wrapper-19" >Accepted</div></div></div></div></div></div>
+<div class="container-17" ><div class="container-16" ><div class="text-wrapper-17" >Hedge&nbsp;&nbsp;Trimming</div></div>
+<div class="element-am-pm-wrapper" ><p class="text-wrapper-18" >9:00 am – 12:00 pm (3 hrs)&nbsp;&nbsp; <br/>The gap 4061<br/>John Smith</p></div></div></div>
+
+<div class="navigation" ><div class="button-21" ><div class="text-wrapper-20" >▣</div>
+<div class="text-wrapper-21" >Calendar</div></div>
+<div class="button-22" ><div class="text-wrapper-22" >▤</div>
+<div class="text-wrapper-23" >Jobs</div></div>
+<div class="button-23" ><div class="text-wrapper-22" >♙</div>
+<div class="text-wrapper-23" >Workers</div></div>
+<a class="button-24" href="../my-account.html" aria-label="My Profile"><div class="text-wrapper-22" >♙</div>
+<div class="text-wrapper-23" >My Profile</div></a></div>
+</div></div>
+
+<script>
+  let calendarStart = formatDateKey(new Date());
+  const calendarDaysCount = 14;
+
+  let currentUser = null;
+  let workerJobs = [];
+  let selectedDate = null;
+
+  function getCurrentUser() {
+    const savedUser =
+      sessionStorage.getItem('currentUser');
+
+    if (!savedUser) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(savedUser);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function normaliseStatus(status) {
+    return String(status || 'Pending').toLowerCase();
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function createDateFromKey(dateKey) {
+    return new Date(`${dateKey}T00:00:00`);
+  }
+
+  function formatDateKey(date) {
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, '0');
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  function getCalendarEndKey() {
+    const endDate = createDateFromKey(calendarStart);
+    endDate.setDate(endDate.getDate() + calendarDaysCount - 1);
+    return formatDateKey(endDate);
+  }
+
+  function renderDateRange() {
+    const startDate = createDateFromKey(calendarStart);
+    const endDate = createDateFromKey(getCalendarEndKey());
+    const dateOptions = { day: 'numeric', month: 'short' };
+    const startLabel = startDate.toLocaleDateString('en-AU', dateOptions);
+    const endLabel = endDate.toLocaleDateString('en-AU', {
+      ...dateOptions,
+      year: 'numeric'
+    });
+
+    document.getElementById('dateRange').textContent =
+      `${startLabel} – ${endLabel}`;
+  }
+
+  function changeCalendarRange(dayOffset) {
+    const startDate = createDateFromKey(calendarStart);
+    startDate.setDate(startDate.getDate() + dayOffset);
+    calendarStart = formatDateKey(startDate);
+
+    const firstDateWithJobs = workerJobs.find(job => {
+      return job.date >= calendarStart && job.date <= getCalendarEndKey();
+    });
+    selectedDate = firstDateWithJobs ? firstDateWithJobs.date : calendarStart;
+
+    renderDateRange();
+    renderCalendar();
+    renderSelectedJobs();
+  }
+
+  function formatSelectedDate(dateKey) {
+    return createDateFromKey(dateKey)
+      .toLocaleDateString('en-AU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      });
+  }
+
+  function formatWorkerLocation(location) {
+  if (!location) return '';
+
+  const parts = location
+    .split(',')
+    .map(part => part.trim())
+    .filter(Boolean);
+
+  if (parts.length >= 2) {
+    return parts[parts.length - 1];
+  }
+
+  return location;
+}
+  function formatTime(timeValue) {
+    if (!timeValue) return '';
+
+    const parts = timeValue.split(':');
+    const date = new Date();
+
+    date.setHours(
+      Number(parts[0]),
+      Number(parts[1]),
+      0,
+      0
+    );
+
+    return date.toLocaleTimeString('en-AU', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  function calculateHours(startTime, endTime) {
+    if (!startTime || !endTime) return '';
+
+    const start = startTime.split(':').map(Number);
+    const end = endTime.split(':').map(Number);
+
+    let minutes =
+      end[0] * 60 + end[1] -
+      (start[0] * 60 + start[1]);
+
+    if (minutes < 0) {
+      minutes += 24 * 60;
+    }
+
+    const hours = minutes / 60;
+
+    return Number.isInteger(hours)
+      ? hours
+      : hours.toFixed(1);
+  }
+
+  function getJobsForDate(dateKey) {
+    return workerJobs.filter(job => {
+      return job.date === dateKey;
+    });
+  }
+
+  function getDotClass(status) {
+    const normalised = normaliseStatus(status);
+
+    if (normalised === 'accepted') {
+      return 'italic-text';
+    }
+
+    if (normalised === 'finished') {
+      return 'finished-dot';
+    }
+
+    if (normalised === 'declined') {
+      return 'italic-text-2';
+    }
+
+    return 'italic-text-3';
+  }
+
+  function getStatusColour(status) {
+    const normalised = normaliseStatus(status);
+
+    if (normalised === 'accepted') {
+      return '#2F8F57';
+    }
+
+    if (normalised === 'finished') {
+      return '#8054c7';
+    }
+
+    if (normalised === 'declined') {
+      return '#E34949';
+    }
+
+    return '#E3A01A';
+  }
+
+  function renderCalendar() {
+    const container =
+      document.getElementById('calendarDays');
+
+    container.innerHTML = '';
+
+    const startDate =
+      createDateFromKey(calendarStart);
+
+    for (
+      let index = 0;
+      index < calendarDaysCount;
+      index += 1
+    ) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + index);
+
+      const dateKey = formatDateKey(date);
+      const jobs = getJobsForDate(dateKey);
+      const isSelected = dateKey === selectedDate;
+
+      const button = document.createElement('button');
+
+      button.className = `button-${5 + index}`;
+      button.type = 'button';
+
+      const dots = jobs
+        .map(job => {
+          return `<div class="${getDotClass(job.status)}" aria-hidden="true"></div>`;
+        })
+        .join('');
+
+      button.innerHTML = `
+        <div class="text-margin">
+          <div class="${isSelected ? 'text-12' : 'text-8'}">
+            <div class="${isSelected ? 'text-wrapper-9' : 'text-wrapper-7'}">
+              ${date.getDate()}
+            </div>
+          </div>
+        </div>
+
+        <div class="text-11">
+          ${dots}
+        </div>
+      `;
+
+      button.addEventListener('click', () => {
+        selectedDate = dateKey;
+
+        window.history.replaceState(
+          {},
+          '',
+          `worker-view.html?date=${encodeURIComponent(dateKey)}`
+        );
+
+        renderCalendar();
+        renderSelectedJobs();
+      });
+
+      container.appendChild(button);
+    }
+  }
+
+  function renderStatistics() {
+    const pending = workerJobs.filter(job => {
+      return normaliseStatus(job.status) === 'pending';
+    }).length;
+
+    const accepted = workerJobs.filter(job => {
+      return normaliseStatus(job.status) === 'accepted';
+    }).length;
+
+    const declined = workerJobs.filter(job => {
+      return normaliseStatus(job.status) === 'declined';
+    }).length;
+
+    const finished = workerJobs.filter(job => {
+      return normaliseStatus(job.status) === 'finished';
+    }).length;
+
+    document.getElementById('pendingCount').textContent =
+      pending;
+
+    document.getElementById('acceptedCount').textContent =
+      accepted;
+
+    document.getElementById('declinedCount').textContent =
+      declined;
+
+    document.getElementById('finishedCount').textContent =
+      finished;
+
+    document.getElementById('totalCount').textContent =
+      workerJobs.length;
+  }
+
+  let activeTab = (window.location.hash === '#jobs' || window.location.hash === '#jobList') ? 'jobs' : 'calendar';
+  let selectedStatusFilter = 'all';
+
+  function formatJobDate(dateKey) {
+    if (!dateKey) return '';
+    return createDateFromKey(dateKey).toLocaleDateString('en-AU', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short'
+    });
+  }
+
+  function clearStatSelection() {
+    document.querySelectorAll('[data-status-filter]').forEach(el => el.classList.remove('is-selected'));
+  }
+
+  function highlightStatBlock(status) {
+    clearStatSelection();
+    const el = document.querySelector(`[data-status-filter="${status}"]`);
+    if (el) el.classList.add('is-selected');
+  }
+
+  function renderView() {
+    renderStatistics();
+    const isJobsTab = (window.location.hash === '#jobs' || window.location.hash === '#jobList');
+    activeTab = isJobsTab ? 'jobs' : 'calendar';
+
+    const viewTitle = document.getElementById('viewTitle');
+    const calendarRangeRow = document.getElementById('calendarRangeRow');
+    const calendarDaysRow = document.getElementById('calendarDaysRow');
+
+    if (activeTab === 'jobs') {
+      if (viewTitle) viewTitle.textContent = 'Jobs';
+      if (calendarRangeRow) calendarRangeRow.style.display = 'none';
+      if (calendarDaysRow) calendarDaysRow.style.display = 'none';
+      renderFilteredJobs();
+    } else {
+      if (viewTitle) viewTitle.textContent = 'Calendar';
+      if (calendarRangeRow) calendarRangeRow.style.display = '';
+      if (calendarDaysRow) calendarDaysRow.style.display = '';
+      clearStatSelection();
+      renderDateRange();
+      renderCalendar();
+      renderSelectedJobs();
+    }
+  }
+
+  function renderFilteredJobs() {
+    highlightStatBlock(selectedStatusFilter);
+
+    let filtered = [];
+    let titleText = 'All Jobs';
+    if (selectedStatusFilter === 'pending') {
+      filtered = workerJobs.filter(j => normaliseStatus(j.status) === 'pending');
+      titleText = 'Pending Jobs';
+    } else if (selectedStatusFilter === 'accepted') {
+      filtered = workerJobs.filter(j => normaliseStatus(j.status) === 'accepted');
+      titleText = 'Accepted Jobs';
+    } else if (selectedStatusFilter === 'declined') {
+      filtered = workerJobs.filter(j => normaliseStatus(j.status) === 'declined');
+      titleText = 'Declined Jobs';
+    } else if (selectedStatusFilter === 'finished') {
+      filtered = workerJobs.filter(j => normaliseStatus(j.status) === 'finished');
+      titleText = 'Finished Jobs';
+    } else {
+      filtered = [...workerJobs];
+      titleText = 'All Jobs';
+    }
+
+    filtered.sort((a, b) => {
+      const dateCmp = (a.date || '').localeCompare(b.date || '');
+      if (dateCmp !== 0) return dateCmp;
+      return (a.startTime || '').localeCompare(b.startTime || '');
+    });
+
+    document.getElementById('selectedDateTitle').textContent = titleText;
+    document.getElementById('selectedJobCount').textContent =
+      `${filtered.length} ${filtered.length === 1 ? 'job' : 'jobs'}`;
+
+    renderJobListCards(filtered, true);
+  }
+
+  function renderSelectedJobs() {
+    const jobs = getJobsForDate(selectedDate);
+
+    document.getElementById(
+      'selectedDateTitle'
+    ).textContent = formatSelectedDate(selectedDate);
+
+    document.getElementById(
+      'selectedJobCount'
+    ).textContent =
+      `${jobs.length} ${jobs.length === 1 ? 'job' : 'jobs'}`;
+
+    renderJobListCards(jobs, false);
+  }
+
+  function renderJobListCards(jobs, showDateInCard) {
+    const jobList =
+      document.getElementById('jobList');
+
+    jobList.innerHTML = '';
+
+    if (jobs.length === 0) {
+      const emptyCard = document.createElement('div');
+      emptyCard.className = 'button-20';
+      const emptyMsg = activeTab === 'jobs'
+        ? `No ${selectedStatusFilter === 'all' ? '' : selectedStatusFilter + ' '}jobs found.`
+        : 'No jobs scheduled for this day.';
+      emptyCard.innerHTML = `
+        <div style="padding: 18px; color: #8B7E74;">
+          ${emptyMsg}
+        </div>
+      `;
+      jobList.appendChild(emptyCard);
+      return;
+    }
+
+    jobs.forEach(job => {
+      const card = document.createElement('div');
+      const hours = calculateHours(
+        job.startTime,
+        job.endTime
+      );
+      const normalisedStatus = normaliseStatus(job.status);
+
+      let rightContent = '';
+      if (normalisedStatus === 'pending') {
+        rightContent = `
+          <div class="worker-action-buttons">
+            <button
+              type="button"
+              class="decline-button"
+              data-status="Declined"
+            >
+              Decline
+            </button>
+            <button
+              type="button"
+              class="accept-button"
+              data-status="Accepted"
+            >
+              Accept
+            </button>
+          </div>
+        `;
+      } else {
+        rightContent = `
+          <div class="worker-job-status ${normalisedStatus}">
+            ${escapeHtml(job.status)}
+          </div>
+        `;
+      }
+
+      card.className = 'button-20 dynamic-worker-job';
+      const datePrefix = showDateInCard ? `${escapeHtml(formatJobDate(job.date))} · ` : '';
+
+      card.innerHTML = `
+        <div class="worker-job-information">
+          <div class="text-wrapper-17">
+            ${escapeHtml(job.title)}
+          </div>
+          <div class="worker-job-description">
+            ${datePrefix}${escapeHtml(formatTime(job.startTime))} – ${escapeHtml(formatTime(job.endTime))} (${escapeHtml(hours)} hrs)
+            <br>
+            ${escapeHtml(formatWorkerLocation(job.location))}
+          </div>
+        </div>
+        ${rightContent}
+      `;
+
+      if (['accepted', 'finished'].includes(normalisedStatus)) {
+        card.classList.add('clickable-job');
+
+        card.addEventListener('click', () => {
+          if (normalisedStatus === 'finished') {
+            window.location.href =
+              `/reallocate-worker/reallocate-worker.html?id=${encodeURIComponent(job._id)}`;
+          } else {
+            window.location.href =
+              `/job%20details-worker/job-details-worker.html?id=${encodeURIComponent(job._id)}`;
+          }
+        });
+      } else {
+        card.classList.add('non-clickable-job');
+      }
+
+      card.querySelectorAll('[data-status]').forEach(button => {
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          updateJobStatus(
+            job._id,
+            button.dataset.status
+          );
+        });
+      });
+
+      jobList.appendChild(card);
+    });
+  }
+
+async function updateJobStatus(jobId, newStatus) {
+  try {
+    const response = await fetch(
+      `/api/jobs/${encodeURIComponent(jobId)}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: newStatus
+        })
+      }
+    );
+
+    const updatedJob = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        updatedJob.message || 'Unable to update job'
+      );
+    }
+
+    workerJobs = workerJobs.map(job => {
+      return job._id === jobId
+        ? updatedJob
+        : job;
+    });
+
+    renderView();
+
+  } catch (error) {
+    console.error(error);
+    alert('Unable to update this job.');
+  }
+}
+
+  async function loadWorkerView() {
+    document.getElementById('jobList').replaceChildren();
+    document.querySelector('.container-17')?.remove();
+    currentUser = getCurrentUser();
+
+    if (
+      !currentUser ||
+      currentUser.role !== 'Worker'
+    ) {
+      if (currentUser && currentUser.role === 'Owner') {
+        window.location.href = '/owner-view/owner-view.html';
+      } else {
+        window.location.href = '/login/login.html';
+      }
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/jobs');
+      if (response.status === 401 || response.status === 403) {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = '/login/login.html';
+        return;
+      }
+      const jobs = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          jobs.message || 'Unable to load jobs'
+        );
+      }
+
+      workerJobs = jobs.filter(job => {
+        return job.assignedWorker === currentUser.name;
+      });
+
+      const params =
+        new URLSearchParams(window.location.search);
+
+      selectedDate = params.get('date');
+
+      if (
+        !selectedDate ||
+        selectedDate < calendarStart ||
+        selectedDate > getCalendarEndKey() ||
+        getJobsForDate(selectedDate).length === 0
+      ) {
+        const firstDateWithJobs = workerJobs.find(job => {
+          return job.date >= calendarStart && job.date <= getCalendarEndKey();
+        });
+        selectedDate = firstDateWithJobs
+          ? firstDateWithJobs.date
+          : calendarStart;
+      }
+
+      renderDateRange();
+      renderCalendar();
+      renderView();
+
+    } catch (error) {
+      console.error('Worker calendar error:', error);
+
+      document.getElementById(
+        'selectedDateTitle'
+      ).textContent = 'Unable to load jobs';
+      document.getElementById('selectedJobCount').textContent = '0 jobs';
+      document.getElementById('jobList').replaceChildren();
+    }
+  }
+
+  document.querySelector('.button-3').addEventListener('click', () => {
+    changeCalendarRange(-calendarDaysCount);
+  });
+  document.querySelector('.button-4').addEventListener('click', () => {
+    changeCalendarRange(calendarDaysCount);
+  });
+
+  // Wire up stat block clicks for summary filtering
+  document.querySelectorAll('[data-status-filter]').forEach(el => {
+    el.addEventListener('click', () => {
+      const filter = el.dataset.statusFilter;
+      selectedStatusFilter = filter;
+      if (window.location.hash !== '#jobs') {
+        window.location.hash = '#jobs';
+      } else {
+        renderView();
+      }
+    });
+  });
+
+  window.addEventListener('hashchange', renderView);
+
+  loadWorkerView();
+</script>
+</body>
+</html>

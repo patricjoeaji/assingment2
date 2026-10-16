@@ -1,0 +1,622 @@
+
+    <!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../globals.css">
+<link rel="stylesheet" href="job-details-worker.css">
+</head>
+<body>
+<div class="job-details-worker" data-model-id="13:660"><div class="employee-job-details" ><div class="container" ><div class="div-wrapper" ><div class="text-wrapper" >9:41</div></div>
+<div class="div-wrapper" ><div class="div" >●●● Wi‑Fi ▰</div></div></div>
+<div class="section" ><header class="header" >
+    
+   <button class="button" id="backButton" type="button">
+        
+        <div class="text-wrapper-2" >‹</div></button>
+<div class="bold-text" ><div class="text-wrapper-3" >Job Details</div></div>
+<div class="small" >
+    
+   <div class="text-wrapper-4" id="jobNumber">Job</div>
+
+</div></header>
+<div class="container-margin-wrapper" ><div class="container-margin" ><div class="section-2" ><div class="container-2" ><div class="heading-margin" ><div class="heading" >
+    
+   <div class="text-wrapper-5" id="jobTitle">Loading...</div>
+
+</div></div>
+<div class="frame" ><div class="text" >
+    
+  <div class="text-wrapper-6" id="jobStatus">Loading...</div>
+
+</div></div></div>
+<div class="container-wrapper" ><div class="container-3" ><div class="text-2" >
+    
+    <div class="text-wrapper-7" id="jobDate">▣ Loading...</div>
+
+</div>
+<div class="text-3" >
+    
+  <p class="text-wrapper-7" id="jobTime">◷ Loading...</p>
+
+</div>
+<div class="text-4" >
+    
+   <p class="text-wrapper-7" id="jobLocation">⌖ Loading...</p>
+
+</div></div></div>
+<div class="paragraph" >
+    
+   <p class="do-the-hedge" id="jobDescription">Loading...</p>
+
+</div></div>
+
+<div class="button-wrapper">
+
+<button
+  class="button-2"
+  id="clockOutButton"
+  type="button"
+  onclick="handleClockOut()"
+>
+
+    <div class="text-wrapper-8">Clock Out</div>
+  </button>
+</div>
+
+<div class="container-4">
+ <button
+  class="button-3"
+  id="clockInButton"
+  type="button"
+  onclick="handleClockIn()"
+>
+    <div class="text-wrapper-9">Clock In</div>
+  </button>
+  <p class="clock-in-window-message" id="clockInWindowMessage" role="status" hidden></p>
+</div>
+
+</div></div></div></div>
+<div class="frame-2" ><div class="container-5" ><div class="container-6" ><div class="text-5" ><div class="text-wrapper-10" >Started</div></div>
+
+<div class="container-7">
+  <div class="text-wrapper-11" id="startedTime">—</div>
+</div>
+
+</div>
+<div class="container-6" ><div class="text-6" ><div class="text-wrapper-10" >Finished</div></div>
+
+<div class="container-7">
+  <div class="text-wrapper-11" id="finishedTime">—</div>
+</div>
+
+</div>
+<div class="container-8" ><div class="text-7" ><div class="text-wrapper-10" >Total</div></div>
+
+<div class="container-7">
+  <div class="text-wrapper-12" id="totalTime">—</div>
+</div>
+
+</div></div>
+<div class="completion-fields">
+  <label class="completion-note-label" for="completionNote">Completion note (optional)</label>
+  <textarea class="completion-note-input" id="completionNote" name="note" rows="2" placeholder="Describe the work completed or anything the Owner should know."></textarea>
+  <p class="completion-error" id="completionError" role="status" aria-live="polite"></p>
+</div>
+  <div class="completion-photo-field">
+    <label class="completion-upload-button" for="completionPhotos">
+      <span class="completion-upload-icon" aria-hidden="true">📷</span>
+      <span>Upload photos</span>
+      <input class="completion-file-input" id="completionPhotos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+    </label>
+  <div class="completion-photo-preview" id="completionPhotoPreview" aria-live="polite"></div>
+</div></div>
+<button class="button-4" id="submitJobButton" type="button" disabled><div class="text-wrapper-15" id="submitJobButtonLabel">Submit completed job</div></button>
+
+
+<div class="frame-3" ><div class="container-9" ><div class="div-wrapper-2" ><div class="text-wrapper-17" >Client contact</div></div>
+<div class="container-margin-3" ><div class="container-10" ><div class="text-9" >
+    
+   <div class="text-wrapper-18" id="clientInitials">--</div>
+
+</div>
+<div class="text-10" ><div class="div-wrapper-2" >
+    
+    <div class="text-wrapper-19" id="clientName">Loading...</div>
+
+</div>
+<div class="div-wrapper-2" >
+    
+   <div class="text-wrapper-20" id="clientPhone">Loading...</div>
+
+</div></div>
+<button class="button-5" id="phoneButton" type="button">
+    
+     <div class="text-wrapper-21" >☎</div></button></div></div></div>
+<div id="jobDetailsScrollSpacer" style="width: 100%; height: 0; pointer-events: none;"></div>
+</div></div>
+
+<script>
+  let currentJob = null;
+  let currentUser = null;
+
+  function getCurrentUser() {
+    try {
+      return JSON.parse(
+        sessionStorage.getItem('currentUser')
+      );
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return '';
+
+    return new Date(`${dateValue}T00:00:00`)
+      .toLocaleDateString('en-AU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+  }
+
+  function formatTime(timeValue) {
+    if (!timeValue) return '';
+
+    const [hours, minutes] =
+      timeValue.split(':').map(Number);
+
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+
+    return date.toLocaleTimeString('en-AU', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  function calculateHours(startTime, endTime) {
+    if (!startTime || !endTime) return '';
+
+    const [startHour, startMinute] =
+      startTime.split(':').map(Number);
+
+    const [endHour, endMinute] =
+      endTime.split(':').map(Number);
+
+    let minutes =
+      endHour * 60 + endMinute -
+      (startHour * 60 + startMinute);
+
+    if (minutes < 0) {
+      minutes += 1440;
+    }
+
+    const hours = minutes / 60;
+
+    return Number.isInteger(hours)
+      ? hours
+      : hours.toFixed(1);
+  }
+
+  function getInitials(name) {
+    if (!name) return '--';
+
+    return name
+      .trim()
+      .split(/\s+/)
+      .map(word => word.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  }
+function formatRecordedTime(value) {
+  if (!value) return '—';
+
+  return new Date(value).toLocaleTimeString(
+    'en-AU',
+    {
+      hour: 'numeric',
+      minute: '2-digit'
+    }
+  );
+}
+
+function calculateRecordedDuration(startValue, endValue) {
+  if (!startValue || !endValue) {
+    return '—';
+  }
+
+  const minutes = Math.max(
+    0,
+    Math.round(
+      (new Date(endValue) - new Date(startValue)) / 60000
+    )
+  );
+
+  if (minutes < 60) {
+    return `${minutes} min`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return remainingMinutes === 0
+    ? `${hours} hr`
+    : `${hours} hr ${remainingMinutes} min`;
+}
+
+function renderWorkTime() {
+  document.getElementById('startedTime').textContent =
+    formatRecordedTime(currentJob?.clockInAt);
+
+  document.getElementById('finishedTime').textContent =
+    formatRecordedTime(currentJob?.clockOutAt);
+
+  document.getElementById('totalTime').textContent =
+    calculateRecordedDuration(
+      currentJob?.clockInAt,
+      currentJob?.clockOutAt
+    );
+
+  const clockInButton =
+    document.getElementById('clockInButton');
+
+  const clockOutButton =
+    document.getElementById('clockOutButton');
+
+  clockInButton.disabled =
+     currentJob?.status === 'Finished' ||
+     Boolean(currentJob?.clockInAt) ||
+     currentJob?.clockInWindowExpired === true;
+  const clockInWindowMessage = document.getElementById('clockInWindowMessage');
+  clockInWindowMessage.hidden = currentJob?.clockInWindowExpired !== true;
+  clockInWindowMessage.textContent = currentJob?.clockInWindowExpired
+    ? 'Clock-in is unavailable more than 1 hour after the scheduled start time.'
+    : '';
+
+  clockOutButton.disabled =
+    !currentJob?.clockInAt ||
+     currentJob?.status === 'Finished' ||
+     Boolean(currentJob?.clockOutAt);
+
+  document.getElementById('submitJobButton').disabled =
+     currentJob?.status === 'Finished' ||
+     Boolean(currentJob?.completionSubmittedAt);
+  completionPhotos.disabled =
+    currentJob?.status === 'Finished' ||
+    Boolean(currentJob?.completionSubmittedAt);
+}
+
+async function saveWorkTime(action) {
+  if (!currentJob) return;
+
+  try {
+    const response = await fetch(
+      `/api/jobs/${encodeURIComponent(currentJob._id)}/clock-${action}`,
+      {
+        method: 'POST'
+      }
+    );
+
+    const updatedJob = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        updatedJob.message || 'Unable to save time'
+      );
+    }
+
+    currentJob = updatedJob;
+    renderWorkTime();
+
+  } catch (error) {
+    console.error(error);
+    if (action === 'in') {
+      document.getElementById('clockInButton').disabled =
+        currentJob?.status === 'Finished' ||
+        Boolean(currentJob?.clockInAt) ||
+        currentJob?.clockInWindowExpired === true;
+      if (/more than 1 hour after the scheduled start/i.test(error.message || '')) {
+        currentJob.clockInWindowExpired = true;
+        const clockInWindowMessage = document.getElementById('clockInWindowMessage');
+        clockInWindowMessage.textContent = error.message;
+        clockInWindowMessage.hidden = false;
+      }
+    }
+    alert(error.message || 'Unable to save working time.');
+  }
+}
+
+async function handleClockIn() {
+  if (!currentJob || currentJob.clockInAt) {
+    return;
+  }
+
+  document.getElementById(
+    'clockInButton'
+  ).disabled = true;
+
+  await saveWorkTime('in');
+}
+
+async function handleClockOut() {
+  if (
+    !currentJob ||
+    !currentJob.clockInAt ||
+    currentJob.clockOutAt
+  ) {
+    return;
+  }
+
+  document.getElementById(
+    'clockOutButton'
+  ).disabled = true;
+
+  await saveWorkTime('out');
+}
+  async function loadJobDetails() {
+    currentUser = getCurrentUser();
+
+    if (
+      !currentUser ||
+      currentUser.role !== 'Worker'
+    ) {
+      if (currentUser && currentUser.role === 'Owner') {
+        window.location.href = '/owner-view/owner-view.html';
+      } else {
+        window.location.href = '/login/login.html';
+      }
+      return;
+    }
+
+    const params =
+      new URLSearchParams(window.location.search);
+
+    const jobId = params.get('id');
+
+    if (!jobId) {
+      alert('Job ID is missing.');
+      window.location.href = '/worker-view/worker-view.html';
+      return;
+    }
+
+    try {
+      const response =
+        await fetch(`/api/jobs/${encodeURIComponent(jobId)}`);
+
+      if (response.status === 401) {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = '/login/login.html';
+        return;
+      }
+      if (response.status === 403) {
+        alert('This job is not assigned to you.');
+        window.location.href = '/worker-view/worker-view.html';
+        return;
+      }
+
+      const job = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          job.message || 'Unable to load job'
+        );
+      }
+
+      if (
+        job.assignedWorker !== currentUser.name ||
+          !['accepted', 'finished'].includes(String(job.status).toLowerCase())
+      ) {
+        alert('This job is not available.');
+        window.location.href = '/worker-view/worker-view.html';
+        return;
+      }
+
+      if (String(job.status).toLowerCase() === 'finished') {
+        window.location.href = `/reallocate-worker/reallocate-worker.html?id=${encodeURIComponent(job._id)}`;
+        return;
+      }
+
+      currentJob = job;
+      renderWorkTime();
+
+      document.getElementById('jobNumber').textContent =
+        `Job #${job._id.slice(-4).toUpperCase()}`;
+
+      document.getElementById('jobTitle').textContent =
+        job.title;
+
+      document.getElementById('jobStatus').textContent =
+        job.status;
+
+      document.getElementById('jobDate').textContent =
+        `▣ ${formatDate(job.date)}`;
+
+      const hours = calculateHours(
+        job.startTime,
+        job.endTime
+      );
+
+      document.getElementById('jobTime').textContent =
+        `◷ ${formatTime(job.startTime)} – ` +
+        `${formatTime(job.endTime)} (${hours} hrs)`;
+
+      document.getElementById('jobLocation').textContent =
+        `⌖ ${job.location}`;
+
+      document.getElementById('jobDescription').textContent =
+        job.description || 'No description provided.';
+
+      document.getElementById('clientInitials').textContent =
+        getInitials(job.clientName);
+
+      document.getElementById('clientName').textContent =
+        job.clientName || 'Client';
+
+      document.getElementById('clientPhone').textContent =
+        job.clientPhone || 'No phone number';
+
+    } catch (error) {
+      console.error('Job details error:', error);
+      alert('Unable to load job details.');
+      window.location.href = '/worker-view/worker-view.html';
+    }
+  }
+
+  document
+    .getElementById('backButton')
+    .addEventListener('click', () => {
+      window.location.href = '/worker-view/worker-view.html';
+    });
+
+  document
+    .getElementById('phoneButton')
+    .addEventListener('click', () => {
+      if (!currentJob || !currentJob.clientPhone) {
+        return;
+      }
+
+      const phoneNumber =
+        currentJob.clientPhone.replace(/[^\d+]/g, '');
+
+      window.location.href = `tel:${phoneNumber}`;
+    });
+
+  const completionPhotos = document.getElementById('completionPhotos');
+  const completionNote = document.getElementById('completionNote');
+  const completionPhotoPreview = document.getElementById('completionPhotoPreview');
+  const completionError = document.getElementById('completionError');
+  const submitJobButton = document.getElementById('submitJobButton');
+  const submitJobButtonLabel = document.getElementById('submitJobButtonLabel');
+  let completionPhotoUrls = [];
+  let selectedCompletionFiles = [];
+  let isSubmittingCompletion = false;
+
+  function positionCompletionSubmitButton() {
+    const previewCard = document.querySelector('.frame-2');
+    const scrollContainer = document.querySelector('.section');
+    if (!previewCard || !scrollContainer) return;
+
+    const submitTop = Math.max(765, Math.ceil(previewCard.offsetTop + previewCard.offsetHeight + 14));
+    submitJobButton.style.top = `${submitTop}px`;
+    const totalBottom = submitTop + submitJobButton.offsetHeight + 40;
+    let spacer = document.getElementById('jobDetailsScrollSpacer');
+    if (!spacer) {
+      spacer = document.createElement('div');
+      spacer.id = 'jobDetailsScrollSpacer';
+      spacer.style.width = '100%';
+      scrollContainer.appendChild(spacer);
+    }
+    spacer.style.height = `${Math.max(826, totalBottom)}px`;
+  }
+
+  function updateCompletionPhotoInput() {
+    const updatedFiles = new DataTransfer();
+    selectedCompletionFiles.forEach(file => updatedFiles.items.add(file));
+    completionPhotos.files = updatedFiles.files;
+  }
+
+  function renderCompletionPhotoPreview() {
+    completionPhotoUrls.forEach(url => URL.revokeObjectURL(url));
+    completionPhotoUrls = [];
+    completionPhotoPreview.replaceChildren();
+
+    selectedCompletionFiles.forEach((file, index) => {
+      const tile = document.createElement('div');
+      tile.className = 'completion-photo-item';
+      const image = document.createElement('img');
+      const imageUrl = URL.createObjectURL(file);
+      completionPhotoUrls.push(imageUrl);
+      image.src = imageUrl;
+      image.alt = `Selected completion photo: ${file.name}`;
+
+      const removeButton = document.createElement('button');
+      removeButton.className = 'completion-photo-remove';
+      removeButton.type = 'button';
+      removeButton.textContent = '×';
+      removeButton.setAttribute('aria-label', `Remove ${file.name}`);
+      removeButton.addEventListener('click', () => {
+        selectedCompletionFiles = selectedCompletionFiles.filter((_, fileIndex) => fileIndex !== index);
+        updateCompletionPhotoInput();
+        renderCompletionPhotoPreview();
+      });
+
+      tile.append(image, removeButton);
+      completionPhotoPreview.appendChild(tile);
+    });
+  }
+
+  completionPhotos.addEventListener('change', () => {
+    const newFiles = Array.from(completionPhotos.files || []);
+    const fileKeys = new Set(selectedCompletionFiles.map(file => `${file.name}:${file.size}:${file.lastModified}`));
+    const additions = newFiles.filter(file => {
+      const key = `${file.name}:${file.size}:${file.lastModified}`;
+      if (fileKeys.has(key)) return false;
+      fileKeys.add(key);
+      return true;
+    });
+    selectedCompletionFiles.push(...additions);
+    completionError.textContent = '';
+    updateCompletionPhotoInput();
+    renderCompletionPhotoPreview();
+    requestAnimationFrame(positionCompletionSubmitButton);
+  });
+
+  completionNote.addEventListener('input', () => {
+    requestAnimationFrame(positionCompletionSubmitButton);
+  });
+
+  async function submitCompletedJob() {
+    if (!currentJob || currentJob.status === 'Finished' || currentJob.completionSubmittedAt || isSubmittingCompletion) return;
+
+    const formData = new FormData();
+    formData.set('note', completionNote.value);
+    selectedCompletionFiles.forEach(file => {
+      formData.append('photos', file);
+    });
+
+    isSubmittingCompletion = true;
+    submitJobButton.disabled = true;
+    submitJobButtonLabel.textContent = 'Submitting...';
+    completionError.textContent = '';
+    completionError.classList.remove('is-success');
+    try {
+      const response = await fetch(`/api/jobs/${encodeURIComponent(currentJob._id)}/completion`, {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Unable to submit completed job.');
+
+      currentJob = result.job;
+      document.getElementById('jobStatus').textContent = currentJob.status || 'Finished';
+      completionNote.value = '';
+      selectedCompletionFiles = [];
+      updateCompletionPhotoInput();
+      renderCompletionPhotoPreview();
+      completionError.textContent = result.message || 'Completed job submitted for approval.';
+      completionError.classList.add('is-success');
+      renderWorkTime();
+        window.location.href = `/reallocate-worker/reallocate-worker.html?id=${encodeURIComponent(currentJob._id)}`;
+    } catch (error) {
+      completionError.textContent = error.message;
+      completionError.classList.remove('is-success');
+    } finally {
+      isSubmittingCompletion = false;
+      submitJobButtonLabel.textContent = 'Submit completed job';
+      renderWorkTime();
+    }
+  }
+
+  submitJobButton.addEventListener('click', submitCompletedJob);
+  window.addEventListener('resize', positionCompletionSubmitButton);
+
+   
+
+  loadJobDetails();
+</script>
+</body>
+</html>

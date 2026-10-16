@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weekly Timesheets | JobFlow</title>
+  <link rel="stylesheet" href="globals.css">
+  <link rel="stylesheet" href="owner-view/owner-view.css">
+  <link rel="stylesheet" href="timesheets.css">
+  <link rel="stylesheet" href="bottom-nav.css">
+  <script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="owner-view">
+  <div class="container-57">
+    <div class="div-wrapper-13"><div class="text-wrapper-124">9:41</div></div>
+    <div class="div-wrapper-13"><div class="text-wrapper-125">●●● Wi‑Fi ▰</div></div>
+  </div>
+
+  <main class="timesheets-page">
+    <header class="page-header">
+      <a class="schedule-link" href="/owner-view/owner-view.html">&larr; Schedule</a>
+      <a class="brand" href="/owner-view/owner-view.html" aria-label="JobFlow schedule">
+        <span class="brand-mark">J</span>
+        <span>JobFlow</span>
+      </a>
+    </header>
+
+    <div class="page-title-row">
+      <div>
+        <h1>Timesheets</h1>
+        <p id="week-label">Review worker hours for the week.</p>
+      </div>
+      <div class="week-controls" aria-label="Choose week">
+        <input id="week-date" type="date" aria-label="Week containing date">
+      </div>
+    </div>
+
+    <section class="timesheet-section" aria-label="Timesheet follow-up groups">
+      <p class="list-message" id="list-message" role="status" aria-live="polite">Loading timesheets...</p>
+      <div class="timesheet-list" id="timesheet-list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <div class="navigation-6"></div>
+</div>
+
+  <script>
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (error) {
+      currentUser = null;
+    }
+
+    if (!currentUser || currentUser.role !== 'Owner') {
+      if (currentUser && currentUser.role === 'Worker') {
+        window.location.href = '/worker-view/worker-view.html';
+      } else {
+        window.location.href = '/login/login.html';
+      }
+    }
+
+    const listMessage = document.getElementById('list-message');
+    const timesheetList = document.getElementById('timesheet-list');
+    const weekDateInput = document.getElementById('week-date');
+    const weekLabel = document.getElementById('week-label');
+    let weekStartDate = startOfWeek(new Date());
+    const timesheetsById = new Map();
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function formatTime(value) {
+      if (!value) return '--';
+      const str = String(value).trim();
+      if (/^([01]?\d|2[0-3]):[0-5]\d$/.test(str)) {
+        const [h, m] = str.split(':').map(Number);
+        const period = h >= 12 ? 'pm' : 'am';
+        const displayHour = h % 12 || 12;
+        return `${displayHour}:${String(m).padStart(2, '0')} ${period}`;
+      }
+      const d = new Date(str);
+      if (Number.isNaN(d.getTime())) return '--';
+      return d.toLocaleTimeString('en-AU', {
+        timeZone: 'Australia/Brisbane',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    }
+
+    function startOfWeek(date) {
+      const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+      return start;
+    }
+
+    function formatDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDate(value, options = {}) {
+      return new Date(`${value}T00:00:00`).toLocaleDateString('en-AU', {
+        day: 'numeric',
+        month: 'short',
+        year: options.withYear ? 'numeric' : undefined
+      });
+    }
+
+    function formatWeekLabel(startValue, endValue) {
+      return `${formatDate(startValue, { withYear: true })} – ${formatDate(endValue, { withYear: true })}`;
+    }
+
+    function actualClockParts(value) {
+      if (!value) return null;
+      const parts = new Intl.DateTimeFormat('en-AU', {
+        timeZone: 'Australia/Brisbane',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }).formatToParts(new Date(value));
+      const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+      return {
+        date: `${values.year}-${values.month}-${values.day}`,
+        time: `${values.hour}:${values.minute}`,
+        minutes: Date.UTC(
+          Number(values.year),
+          Number(values.month) - 1,
+          Number(values.day),
+          Number(values.hour),
+          Number(values.minute)
+        ) / 60000
+      };
+    }
+
+    function actualMinutes(value) {
+      return actualClockParts(value)?.minutes ?? null;
+    }
+
+    function formatTimeInput(value) {
+      return actualClockParts(value)?.time || '';
+    }
+
+    function getSourceTime(job, isClockOut, source, manualTime = '') {
+      if (source === 'actual') {
+        return actualClockParts(isClockOut ? job.clockOutAt : job.clockInAt)?.time || '';
+      }
+      if (source === 'manual') return manualTime;
+      return isClockOut ? job.endTime : job.startTime;
+    }
+
+    function wallClockMinutes(job, isClockOut, time, clockInTime = '') {
+      if (!time) return null;
+      const [year, month, day] = job.date.split('-').map(Number);
+      const [hour, minute] = time.split(':').map(Number);
+      const dayOffset = isClockOut && clockInTime && time < clockInTime ? 1 : 0;
+      return Date.UTC(
+        year,
+        month - 1,
+        day + dayOffset,
+        hour,
+        minute
+      ) / 60000;
+    }
+
+    function chosenMinutes(job, isClockOut, source, manualTime = '', clockInTime = '') {
+      const actual = isClockOut ? job.clockOutAt : job.clockInAt;
+      if (source === 'actual' && actual) return actualMinutes(actual);
+      return wallClockMinutes(
+        job,
+        isClockOut,
+        getSourceTime(job, isClockOut, source, manualTime),
+        clockInTime
+      );
+    }
+
+    function formatDuration(totalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (!hours) return `${minutes} min`;
+      return minutes ? `${hours} hr ${minutes} min` : `${hours} hr`;
+    }
+
+    function formatChosenTimeDisplay(job, kind, source, manualTime = '') {
+      const isClockOut = kind === 'out';
+      if (source === 'actual') {
+        const actual = isClockOut ? job.clockOutAt : job.clockInAt;
+        return actual ? formatTime(actual) : '--';
+      }
+      if (source === 'scheduled') {
+        return formatTime(isClockOut ? job.endTime : job.startTime);
+      }
+      if (source === 'manual') {
+        return manualTime ? formatTime(manualTime) : 'Manual';
+      }
+      return '--';
+    }
+
+    function timeChoiceOptions(job, kind, selectedSource) {
+      const isClockOut = kind === 'out';
+      const actualValue = isClockOut ? job.clockOutAt : job.clockInAt;
+      const selected = selectedSource || 'actual';
+      const actualText = actualValue
+        ? `Actual · ${escapeHtml(formatTime(actualValue))}`
+        : 'Actual · Not recorded';
+      const scheduledTime = isClockOut ? job.endTime : job.startTime;
+      const scheduledText = `Scheduled · ${escapeHtml(formatTime(scheduledTime))}`;
+
+      return `<option value="actual" ${selected === 'actual' ? 'selected' : ''}>${actualText}</option><option value="scheduled" ${selected === 'scheduled' ? 'selected' : ''}>${scheduledText}</option><option value="manual" ${selected === 'manual' ? 'selected' : ''}>Manual entry</option>`;
+    }
+
+    function renderJob(job, groupId) {
+      const approved = job.hoursApprovalStatus === 'Approved';
+      const finished = String(job.status).toLowerCase() === 'finished';
+      const clockInSource = approved ? (job.approvedClockInSource || 'actual') : 'actual';
+      const clockOutSource = approved ? (job.approvedClockOutSource || 'actual') : 'actual';
+      const clockInManual = formatTimeInput(job.approvedClockInAt);
+      const clockOutManual = formatTimeInput(job.approvedClockOutAt);
+      const clockInTime = getSourceTime(job, false, clockInSource, clockInManual);
+      const clockOutTime = getSourceTime(job, true, clockOutSource, clockOutManual);
+      const clockInMinutes = chosenMinutes(job, false, clockInSource, clockInManual);
+      const clockOutMinutes = chosenMinutes(job, true, clockOutSource, clockOutManual, clockInTime);
+      const totalMinutes = clockInMinutes === null || clockOutMinutes === null
+        ? null
+        : Math.max(0, clockOutMinutes - clockInMinutes);
+
+      return `
+        <article class="timesheet-row" data-timesheet-id="${escapeHtml(job.id)}">
+          <div class="timesheet-heading">
+            <div>
+              <h3>${escapeHtml(job.title)}</h3>
+              <p>${escapeHtml(job.assignedWorker)} · ${escapeHtml(formatDate(job.date))} · ${escapeHtml(job.location)}</p>
+            </div>
+            ${approved ? `<button class="undo-approval-button" type="button" data-undo-approval-id="${escapeHtml(job.id)}" aria-label="Undo approval for ${escapeHtml(job.title)}">↶ Undo</button>` : ''}
+          </div>
+          <div class="time-choices ${groupId === 'awaiting-completion' ? 'time-choices-pending' : ''}">
+            ${groupId === 'awaiting-completion' ? `
+              <label>Clock In
+                <span class="time-placeholder">--</span>
+                <span class="scheduled-reference">Scheduled ${escapeHtml(formatTime(job.startTime))}</span>
+              </label>
+              <label>Clock Out
+                <span class="time-placeholder">--</span>
+                <span class="scheduled-reference">Scheduled ${escapeHtml(formatTime(job.endTime))}</span>
+              </label>
+              <div class="approved-total"><span data-total-label>Total (Pending)</span><strong>--</strong></div>
+            ` : `
+              <label>Clock In
+                <div class="time-select-wrapper">
+                  <div class="time-select-display ${approved ? 'is-disabled' : ''}" data-display-kind="in">
+                    <span>${escapeHtml(formatChosenTimeDisplay(job, 'in', clockInSource, clockInManual))}</span>
+                  </div>
+                  <select data-time-kind="in" ${!finished || approved ? 'disabled' : ''}>${timeChoiceOptions(job, 'in', clockInSource)}</select>
+                </div>
+                <div class="time-manual-wrapper" ${clockInSource !== 'manual' || !finished || approved ? 'hidden' : ''}>
+                  <input type="time" data-manual-kind="in" value="${escapeHtml(clockInManual)}" ${approved ? 'disabled' : ''} ${clockInSource === 'manual' && finished && !approved ? 'required' : ''}>
+                </div>
+                <span class="scheduled-reference">Scheduled ${escapeHtml(formatTime(job.startTime))}</span>
+              </label>
+              <label>Clock Out
+                <div class="time-select-wrapper">
+                  <div class="time-select-display ${approved ? 'is-disabled' : ''}" data-display-kind="out">
+                    <span>${escapeHtml(formatChosenTimeDisplay(job, 'out', clockOutSource, clockOutManual))}</span>
+                  </div>
+                  <select data-time-kind="out" ${!finished || approved ? 'disabled' : ''}>${timeChoiceOptions(job, 'out', clockOutSource)}</select>
+                </div>
+                <div class="time-manual-wrapper" ${clockOutSource !== 'manual' || !finished || approved ? 'hidden' : ''}>
+                  <input type="time" data-manual-kind="out" value="${escapeHtml(clockOutManual)}" ${approved ? 'disabled' : ''} ${clockOutSource === 'manual' && finished && !approved ? 'required' : ''}>
+                </div>
+                <span class="scheduled-reference">Scheduled ${escapeHtml(formatTime(job.endTime))}</span>
+              </label>
+              <div class="approved-total"><span data-total-label>${approved ? 'Total (Approved)' : 'Total (Pending)'}</span><strong data-total>${totalMinutes === null ? '--' : escapeHtml(formatDuration(totalMinutes))}</strong></div>
+            `}
+          </div>
+          ${finished && !approved ? `<div class="timesheet-actions"><button class="approve-button" type="button" data-approve-id="${escapeHtml(job.id)}">Approve Times</button></div>` : ''}
+        </article>
+      `;
+    }
+
+    async function loadTimesheets() {
+      listMessage.textContent = 'Loading timesheets...';
+      timesheetList.replaceChildren();
+      weekDateInput.value = formatDateKey(weekStartDate);
+
+      try {
+        const response = await fetch(`/api/timesheets?weekStart=${formatDateKey(weekStartDate)}`);
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to load timesheets.');
+
+        weekStartDate = new Date(`${result.weekStart}T00:00:00`);
+        timesheetsById.clear();
+        result.jobs.forEach(job => timesheetsById.set(job.id, job));
+        weekLabel.textContent = formatWeekLabel(result.weekStart, result.weekEnd);
+
+        const groups = [
+          {
+            id: 'awaiting-completion',
+            title: 'Awaiting Completion',
+            jobs: result.jobs.filter(job =>
+              job.hoursApprovalStatus !== 'Approved' &&
+              String(job.status).toLowerCase() !== 'finished' &&
+              !job.completionSubmittedAt
+            )
+          },
+          {
+            id: 'awaiting-approval',
+            title: 'Awaiting Approval',
+            jobs: result.jobs.filter(job =>
+              job.hoursApprovalStatus !== 'Approved' &&
+              (String(job.status).toLowerCase() === 'finished' || job.completionSubmittedAt)
+            )
+          },
+          {
+            id: 'approved',
+            title: 'Approved',
+            jobs: result.jobs.filter(job => job.hoursApprovalStatus === 'Approved')
+          }
+        ];
+        const byEarliestSchedule = (first, second) =>
+          String(first.date).localeCompare(String(second.date)) ||
+          String(first.startTime).localeCompare(String(second.startTime)) ||
+          String(first.title).localeCompare(String(second.title));
+
+        groups.forEach(group => group.jobs.sort(byEarliestSchedule));
+        timesheetList.innerHTML = groups.map(group => `
+          <section class="case-group" aria-labelledby="${group.id}-heading">
+            <div class="list-heading-row case-group-heading">
+              <h2 id="${group.id}-heading">${group.title}</h2>
+              <span class="case-count" aria-label="${group.jobs.length} ${group.jobs.length === 1 ? 'case' : 'cases'}">${group.jobs.length}</span>
+            </div>
+            ${group.jobs.map(job => renderJob(job, group.id)).join('')}
+          </section>
+        `).join('');
+        listMessage.textContent = result.jobs.length ? '' : 'No assigned jobs for this week.';
+      } catch (error) {
+        listMessage.textContent = error.message;
+      }
+    }
+
+    function updateSelectedTotal(row) {
+      const job = timesheetsById.get(row.dataset.timesheetId);
+      if (!job) return;
+      const inSelect = row.querySelector('[data-time-kind="in"]');
+      const outSelect = row.querySelector('[data-time-kind="out"]');
+      const inSource = inSelect ? inSelect.value : 'actual';
+      const outSource = outSelect ? outSelect.value : 'actual';
+      const inManual = row.querySelector('[data-manual-kind="in"]').value;
+      const outManual = row.querySelector('[data-manual-kind="out"]').value;
+      const inTime = getSourceTime(job, false, inSource, inManual);
+      const inMinutes = chosenMinutes(job, false, inSource, inManual);
+      const outMinutes = chosenMinutes(job, true, outSource, outManual, inTime);
+      const manualInWrapper = row.querySelector('[data-manual-kind="in"]')?.closest('.time-manual-wrapper');
+      const manualOutWrapper = row.querySelector('[data-manual-kind="out"]')?.closest('.time-manual-wrapper');
+      const manualClockIn = row.querySelector('[data-manual-kind="in"]');
+      const manualClockOut = row.querySelector('[data-manual-kind="out"]');
+      if (manualInWrapper) manualInWrapper.hidden = inSource !== 'manual';
+      if (manualOutWrapper) manualOutWrapper.hidden = outSource !== 'manual';
+      if (manualClockIn) manualClockIn.required = inSource === 'manual';
+      if (manualClockOut) manualClockOut.required = outSource === 'manual';
+
+      const inDisplay = row.querySelector('[data-display-kind="in"] span');
+      const outDisplay = row.querySelector('[data-display-kind="out"] span');
+      if (inDisplay) inDisplay.textContent = formatChosenTimeDisplay(job, 'in', inSource, inManual);
+      if (outDisplay) outDisplay.textContent = formatChosenTimeDisplay(job, 'out', outSource, outManual);
+
+      const approved = job.hoursApprovalStatus === 'Approved';
+      const totalLabel = row.querySelector('[data-total-label]');
+      if (totalLabel) {
+        totalLabel.textContent = approved ? 'Total (Approved)' : 'Total (Pending)';
+      }
+
+      row.querySelector('[data-total]').textContent = (inMinutes === null || outMinutes === null)
+        ? '--'
+        : formatDuration(Math.max(0, outMinutes - inMinutes));
+    }
+
+    timesheetList.addEventListener('change', event => {
+      const row = event.target.closest('.timesheet-row');
+      if (row && event.target.matches('[data-time-kind], [data-manual-kind]')) updateSelectedTotal(row);
+    });
+
+    timesheetList.addEventListener('input', event => {
+      const row = event.target.closest('.timesheet-row');
+      if (row && event.target.matches('[data-manual-kind]')) updateSelectedTotal(row);
+    });
+
+    timesheetList.addEventListener('click', async event => {
+      const undoButton = event.target.closest('[data-undo-approval-id]');
+      const button = event.target.closest('[data-approve-id]');
+      const row = event.target.closest('.timesheet-row');
+      if (!row) return;
+
+      if (undoButton) {
+        undoButton.disabled = true;
+        const undoneJobId = undoButton.dataset.undoApprovalId;
+        try {
+          const response = await fetch(`/api/jobs/${encodeURIComponent(undoneJobId)}/hours-approval/undo`, {
+            method: 'PATCH'
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || 'Unable to undo approval.');
+          await loadTimesheets();
+          listMessage.textContent = result.message;
+          const awaitingApprovalRow = [...timesheetList.querySelectorAll('.timesheet-row')]
+            .find(timesheetRow => timesheetRow.dataset.timesheetId === undoneJobId);
+          awaitingApprovalRow?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (error) {
+          listMessage.textContent = error.message;
+          undoButton.disabled = false;
+        }
+        return;
+      }
+
+      if (!button) {
+        return;
+      }
+
+      button.disabled = true;
+      try {
+        const response = await fetch(`/api/jobs/${encodeURIComponent(button.dataset.approveId)}/hours-approval`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clockInSource: row.querySelector('[data-time-kind="in"]').value,
+            clockOutSource: row.querySelector('[data-time-kind="out"]').value,
+            clockInManual: row.querySelector('[data-manual-kind="in"]').value,
+            clockOutManual: row.querySelector('[data-manual-kind="out"]').value
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to approve hours.');
+        await loadTimesheets();
+      } catch (error) {
+        listMessage.textContent = error.message;
+        button.disabled = false;
+      }
+    });
+
+    weekDateInput.addEventListener('change', () => {
+      if (!weekDateInput.value) return;
+      weekStartDate = startOfWeek(new Date(`${weekDateInput.value}T00:00:00`));
+      loadTimesheets();
+    });
+
+    if (currentUser && currentUser.role === 'Owner') loadTimesheets();
+  </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Account | JobFlow</title>
+  <link rel="stylesheet" href="globals.css">
+  <link rel="stylesheet" href="worker-view/worker-view.css">
+  <link rel="stylesheet" href="my-account.css">
+</head>
+<body>
+<div class="worker-view">
+  <div class="div">
+    <div class="container">
+      <div class="div-wrapper"><div class="text-wrapper">9:41</div></div>
+      <div class="div-wrapper"><div class="text-wrapper-2">●●● Wi‑Fi ▰</div></div>
+    </div>
+
+    <main class="account-page">
+      <header class="account-header">
+        <a class="schedule-link" id="schedule-link" href="/login/login.html">&larr; Schedule</a>
+        <a class="brand" href="/login/login.html" aria-label="JobFlow sign in">
+          <span class="brand-mark">J</span>
+          <span>JobFlow</span>
+        </a>
+      </header>
+
+      <h1>My Account</h1>
+
+      <section class="account-section" aria-label="Personal details">
+        <form id="profile-form">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" autocomplete="name" required>
+
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel">
+
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+
+          <button class="primary-button" type="submit">Save Changes</button>
+        </form>
+        <p class="form-message" id="profile-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="account-section" aria-label="Change Password">
+        <form id="password-form">
+          <label for="current-password">Current Password</label>
+          <input id="current-password" name="current-password" type="password" autocomplete="current-password" required>
+
+          <label for="new-password">New Password</label>
+          <input id="new-password" name="new-password" type="password" minlength="8" autocomplete="new-password" required>
+
+          <label for="confirm-password">Confirm Password</label>
+          <input id="confirm-password" name="confirm-password" type="password" minlength="8" autocomplete="new-password" required>
+
+          <button class="primary-button" type="submit">Update Password</button>
+        </form>
+        <p class="form-message" id="password-message" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+  </div>
+</div>
+
+  <script>
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (error) {
+      currentUser = null;
+    }
+
+    if (!currentUser || !currentUser.id || !['Owner', 'Worker'].includes(currentUser.role)) {
+      window.location.href = '/login/login.html';
+    } else {
+      const schedulePath = currentUser.role === 'Owner'
+        ? '/owner-view/owner-view.html'
+        : '/worker-view/worker-view.html';
+      document.getElementById('schedule-link').href = schedulePath;
+      const brandLink = document.querySelector('.account-header .brand');
+      if (brandLink) brandLink.href = schedulePath;
+      document.getElementById('name').value = currentUser.name || '';
+      document.getElementById('phone').value = currentUser.phone || '';
+      document.getElementById('email').value = currentUser.email || '';
+    }
+
+    function showMessage(element, text, isError = false) {
+      element.textContent = text;
+      element.classList.toggle('is-error', isError);
+    }
+
+    document.getElementById('profile-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const message = document.getElementById('profile-message');
+      showMessage(message, '');
+
+      try {
+        const response = await fetch(`/api/users/${encodeURIComponent(currentUser.id)}/profile`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('name').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to save profile.');
+
+        currentUser = result.user;
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        showMessage(message, result.message);
+      } catch (error) {
+        showMessage(message, error.message, true);
+      }
+    });
+
+    document.getElementById('password-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const message = document.getElementById('password-message');
+      showMessage(message, '');
+
+      const newPassword = document.getElementById('new-password').value;
+      if (newPassword !== document.getElementById('confirm-password').value) {
+        showMessage(message, 'The new passwords do not match.', true);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/users/${encodeURIComponent(currentUser.id)}/password`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentPassword: document.getElementById('current-password').value,
+            newPassword
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to update password.');
+
+        document.getElementById('password-form').reset();
+        showMessage(message, result.message);
+      } catch (error) {
+        showMessage(message, error.message, true);
+      }
+    });
+  </script>
+</body>
+</html>

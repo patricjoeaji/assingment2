@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Worker | JobFlow</title>
+  <link rel="stylesheet" href="globals.css">
+  <link rel="stylesheet" href="owner-view/owner-view.css">
+  <link rel="stylesheet" href="workers.css">
+  <link rel="stylesheet" href="bottom-nav.css">
+  <script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="owner-view">
+  <div class="container-57">
+    <div class="div-wrapper-13"><div class="text-wrapper-124">9:41</div></div>
+    <div class="div-wrapper-13"><div class="text-wrapper-125">●●● Wi‑Fi ▰</div></div>
+  </div>
+
+  <main class="workers-page">
+    <header class="page-header">
+      <a class="schedule-link" href="/workers.html">&larr; All Workers</a>
+      <a class="brand" href="/owner-view/owner-view.html" aria-label="JobFlow schedule">
+        <span class="brand-mark">J</span>
+        <span>JobFlow</span>
+      </a>
+    </header>
+
+    <div class="page-title-row">
+      <h1>Add Worker</h1>
+    </div>
+
+    <section class="add-section" aria-labelledby="add-heading">
+      <h2 id="add-heading">Worker details</h2>
+      <form id="worker-form">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" autocomplete="name" required>
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required>
+
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" autocomplete="tel" required>
+
+        <label for="password">Temporary Password</label>
+        <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+
+        <div class="form-actions">
+          <a class="secondary-button cancel-link" href="/workers.html">Cancel</a>
+          <button class="primary-button" type="submit">Create Worker</button>
+        </div>
+      </form>
+      <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <div class="navigation-6"></div>
+</div>
+
+  <script>
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (error) {
+      currentUser = null;
+    }
+
+    if (!currentUser || currentUser.role !== 'Owner') {
+      if (currentUser && currentUser.role === 'Worker') {
+        window.location.href = '/worker-view/worker-view.html';
+      } else {
+        window.location.href = '/login/login.html';
+      }
+    }
+
+    document.getElementById('worker-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const message = document.getElementById('form-message');
+      message.textContent = '';
+
+      try {
+        const response = await fetch('/api/workers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            password: document.getElementById('password').value
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to add worker.');
+
+        window.location.href = `/workers.html?added=1&workerId=${encodeURIComponent(result.worker.id)}`;
+      } catch (error) {
+        message.textContent = error.message;
+      }
+    });
+  </script>
+</body>
+</html>

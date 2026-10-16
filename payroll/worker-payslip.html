@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pay Slip | JobFlow</title>
+  <link rel="stylesheet" href="globals.css">
+  <link rel="stylesheet" href="worker-view/worker-view.css">
+  <link rel="stylesheet" href="timesheets.css">
+  <link rel="stylesheet" href="payroll.css">
+  <link rel="stylesheet" href="bottom-nav.css">
+  <script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="worker-view">
+  <div class="div">
+    <div class="container">
+      <div class="div-wrapper"><div class="text-wrapper">9:41</div></div>
+      <div class="div-wrapper"><div class="text-wrapper-2">●●● Wi‑Fi ▰</div></div>
+    </div>
+
+    <div class="section timesheets-page payroll-page" style="width: 100%; min-height: 0; flex: 1 1 auto; height: 768px; padding: 14px 16px 88px; margin: 0; box-shadow: none; border-radius: 0; overflow-y: auto;">
+      <header class="page-header" style="width: 100%;">
+        <a class="schedule-link" href="/worker-view/worker-view.html">&larr; Schedule</a>
+        <a class="brand" href="/worker-view/worker-view.html" aria-label="JobFlow schedule">
+          <span class="brand-mark">J</span>
+          <span>JobFlow</span>
+        </a>
+      </header>
+
+      <div class="page-title-row" style="width: 100%; margin: 18px 0 14px;">
+        <div>
+          <h1 style="font-size: 26px;">Pay Slip</h1>
+          <p id="week-label" style="margin: 4px 0 0;">Loading week...</p>
+        </div>
+        <div class="week-controls" aria-label="Choose week">
+          <input id="week-date" type="date" aria-label="Week containing date">
+        </div>
+      </div>
+
+      <section class="timesheet-section" aria-label="Weekly payslip summary" style="width: 100%;">
+        <div class="payroll-summary" aria-live="polite">
+          <div class="payroll-stat payroll-stat-primary">
+            <span>Total Gross Pay</span>
+            <strong id="gross-pay">--</strong>
+          </div>
+          <div class="payroll-stat">
+            <span>Approved hours</span>
+            <strong id="approved-hours">--</strong>
+          </div>
+          <div class="payroll-stat">
+            <span>Net Pay</span>
+            <strong id="net-pay">--</strong>
+          </div>
+        </div>
+
+        <p class="list-message" id="list-message" role="status" aria-live="polite">Loading pay slip...</p>
+        <div class="payroll-list" id="payroll-list"></div>
+      </section>
+    </div>
+
+    <div class="navigation">
+      <div class="button-21"><div class="text-wrapper-20">▣</div><div class="text-wrapper-21">Calendar</div></div>
+      <div class="button-22"><div class="text-wrapper-22">▤</div><div class="text-wrapper-23">Jobs</div></div>
+      <div class="button-23"><div class="text-wrapper-22">$</div><div class="text-wrapper-23">Pay Slip</div></div>
+      <a class="button-24" href="/my-account.html" aria-label="My Profile"><div class="text-wrapper-22">♙</div><div class="text-wrapper-23">My Profile</div></a>
+    </div>
+  </div>
+</div>
+
+  <script>
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (error) {
+      currentUser = null;
+    }
+
+    if (!currentUser || currentUser.role !== 'Worker') {
+      if (currentUser && currentUser.role === 'Owner') {
+        window.location.href = '/payroll.html';
+      } else {
+        window.location.href = '/login/login.html';
+      }
+    }
+
+    const weekDateInput = document.getElementById('week-date');
+    const weekLabel = document.getElementById('week-label');
+    const listMessage = document.getElementById('list-message');
+    const payrollList = document.getElementById('payroll-list');
+    const grossPayElem = document.getElementById('gross-pay');
+    const approvedHoursElem = document.getElementById('approved-hours');
+    const netPayElem = document.getElementById('net-pay');
+    let weekStartDate = startOfWeek(new Date());
+
+    function startOfWeek(date) {
+      const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+      return start;
+    }
+
+    function formatDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDate(value) {
+      return new Date(`${value}T00:00:00`).toLocaleDateString('en-AU', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function formatDuration(totalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (!hours) return `${minutes} min`;
+      return minutes ? `${hours} hr ${minutes} min` : `${hours} hr`;
+    }
+
+    function formatDayHours(totalMinutes) {
+      if (!totalMinutes || totalMinutes <= 0) return '0 h';
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = Math.round(totalMinutes % 60);
+      if (!hours) return `${minutes}min`;
+      if (!minutes) return `${hours} h`;
+      return `${hours} h ${minutes}min`;
+    }
+
+    function formatCurrency(value) {
+      if (value === null || value === undefined || !Number.isFinite(Number(value))) return '--';
+      return new Intl.NumberFormat('en-AU', {
+        style: 'currency',
+        currency: 'AUD'
+      }).format(value);
+    }
+
+    function formatRate(value) {
+      if (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) return 'Not set';
+      return `${formatCurrency(Number(value))}/hr`;
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function loadPayslip() {
+      listMessage.textContent = 'Loading pay slip...';
+      payrollList.replaceChildren();
+      weekDateInput.value = formatDateKey(weekStartDate);
+
+      try {
+        const weekStart = formatDateKey(weekStartDate);
+        const response = await fetch(`/api/worker/payslip?weekStart=${encodeURIComponent(weekStart)}`);
+        if (response.status === 401 || response.status === 403) {
+          sessionStorage.removeItem('currentUser');
+          window.location.href = '/login/login.html';
+          return;
+        }
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Unable to load pay slip.');
+        }
+
+        weekStartDate = new Date(`${data.weekStart}T00:00:00`);
+        weekLabel.textContent = `${formatDate(data.weekStart)} – ${formatDate(data.weekEnd)}`;
+
+        if (!data.current.minutes || data.current.minutes === 0) {
+          grossPayElem.textContent = '--';
+          approvedHoursElem.textContent = '0 hr';
+          netPayElem.textContent = '--';
+          listMessage.textContent = 'No approved work hours recorded for this week.';
+          return;
+        }
+
+        if (!data.isSent) {
+          grossPayElem.textContent = '--';
+          approvedHoursElem.textContent = '--';
+          netPayElem.textContent = '--';
+          listMessage.textContent = 'Payslips for this week have not been released yet.';
+          return;
+        }
+
+        // Update Top Summary Stats
+        grossPayElem.textContent = formatCurrency(data.current.gross);
+        approvedHoursElem.textContent = formatDuration(data.current.minutes);
+        netPayElem.textContent = formatCurrency(data.current.net);
+
+        listMessage.textContent = '';
+
+        // Render Worker Card (Screenshot 3 style)
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const dayCards = days.map((dayName, idx) => `
+          <div class="payroll-day">
+            <span>${dayName}</span>
+            <strong>${formatDayHours(data.days[idx] || 0)}</strong>
+          </div>
+        `).join('');
+
+        const card = document.createElement('article');
+        card.className = 'payroll-worker-card';
+        card.innerHTML = `
+          <div class="payroll-worker-heading">
+            <div>
+              <h2>${escapeHtml(data.worker.name)}</h2>
+              <p>Base rate: ${escapeHtml(formatRate(data.worker.hourlyRate))}</p>
+            </div>
+            <a class="download-payslip-btn" href="/api/worker/payslip/download?weekStart=${encodeURIComponent(data.weekStart)}" download>
+              <span aria-hidden="true">⬇</span> Download Payslip
+            </a>
+          </div>
+
+          <div class="payroll-week-grid" aria-label="Daily approved hours">
+            ${dayCards}
+          </div>
+
+          <div class="payroll-payslip-summary">
+            <h3>Summary</h3>
+            <div class="payroll-summary-table">
+              <div class="payroll-summary-row payroll-summary-header">
+                <span></span>
+                <span>Hours</span>
+                <span>Rate/hr</span>
+                <span>Super 12%</span>
+                <span>Gross</span>
+                <span>Tax</span>
+                <span>Net Pay</span>
+              </div>
+              <div class="payroll-summary-row">
+                <strong>Current</strong>
+                <span>${data.current.minutes > 0 ? formatDuration(data.current.minutes) : '0 min'}</span>
+                <span>${formatRate(data.current.hourlyRate)}</span>
+                <span>${formatCurrency(data.current.superAmount)}</span>
+                <span>${formatCurrency(data.current.gross)}</span>
+                <span>${formatCurrency(data.current.tax)}</span>
+                <span>${formatCurrency(data.current.net)}</span>
+              </div>
+              <div class="payroll-summary-row payroll-summary-ytd">
+                <strong>YTD</strong>
+                <span>${data.ytd.minutes > 0 ? formatDuration(data.ytd.minutes) : '0 min'}</span>
+                <span>${formatRate(data.ytd.hourlyRate)}</span>
+                <span>${formatCurrency(data.ytd.superAmount)}</span>
+                <span>${formatCurrency(data.ytd.gross)}</span>
+                <span>${formatCurrency(data.ytd.tax)}</span>
+                <span>${formatCurrency(data.ytd.net)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        payrollList.appendChild(card);
+      } catch (error) {
+        console.error('Payslip load error:', error);
+        listMessage.textContent = error.message || 'Unable to load pay slip.';
+        grossPayElem.textContent = '--';
+        approvedHoursElem.textContent = '--';
+        netPayElem.textContent = '--';
+      }
+    }
+
+    weekDateInput.addEventListener('change', () => {
+      if (!weekDateInput.value) return;
+      weekStartDate = startOfWeek(new Date(`${weekDateInput.value}T00:00:00`));
+      loadPayslip();
+    });
+
+    loadPayslip();
+  </script>
+</body>
+</html>

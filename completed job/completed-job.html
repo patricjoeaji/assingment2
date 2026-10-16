@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Completed Job | JobFlow</title>
+  <link rel="stylesheet" href="globals.css">
+  <link rel="stylesheet" href="completed-job.css">
+</head>
+<body>
+  <main class="completed-page">
+    <header class="page-header">
+      <a class="back-link" id="back-link" href="/timesheets.html">&larr; Weekly Timesheets</a>
+      <a class="brand" href="/owner-view/owner-view.html" aria-label="JobFlow schedule">
+        <span class="brand-mark">J</span>
+        <span>JobFlow</span>
+      </a>
+    </header>
+
+    <section class="job-summary" aria-labelledby="job-title">
+      <div class="summary-heading">
+        <div>
+          <p class="eyebrow">COMPLETED JOB</p>
+          <h1 id="job-title">Loading job...</h1>
+        </div>
+        <span class="status-label" id="job-status"></span>
+      </div>
+      <p class="job-description" id="job-description"></p>
+      <div class="job-meta">
+        <span id="job-date"></span>
+        <span id="job-location"></span>
+      </div>
+    </section>
+
+    <section class="detail-section" aria-labelledby="people-heading">
+      <h2 id="people-heading">People</h2>
+      <div class="people-grid">
+        <div><span class="field-label">Worker</span><strong id="worker-name"></strong><a id="worker-contact"></a></div>
+        <div><span class="field-label">Client</span><strong id="client-name"></strong><a id="client-contact"></a></div>
+      </div>
+    </section>
+
+    <section class="detail-section" aria-labelledby="hours-heading">
+      <h2 id="hours-heading">Work time</h2>
+      <div class="hours-grid">
+        <div><span class="field-label">Scheduled</span><strong id="scheduled-range"></strong></div>
+        <div><span class="field-label">Actual clock in</span><strong id="actual-clock-in"></strong></div>
+        <div><span class="field-label">Actual clock out</span><strong id="actual-clock-out"></strong></div>
+        <div><span class="field-label">Approved clock in</span><strong id="approved-clock-in"></strong></div>
+        <div><span class="field-label">Approved clock out</span><strong id="approved-clock-out"></strong></div>
+        <div class="total-hours"><span class="field-label" id="approved-total-label">Current selected total</span><strong id="approved-total"></strong></div>
+      </div>
+    </section>
+
+    <section class="detail-section" aria-labelledby="note-heading">
+      <h2 id="note-heading">Worker note</h2>
+      <p class="completion-note" id="completion-note"></p>
+    </section>
+
+    <section class="detail-section" aria-labelledby="photos-heading">
+      <h2 id="photos-heading">Completed work photos</h2>
+      <p class="photo-empty" id="photo-empty" hidden>No photos were attached.</p>
+      <div class="photo-gallery" id="photo-gallery"></div>
+    </section>
+  </main>
+
+  <script>
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (error) {
+      currentUser = null;
+    }
+
+    if (!currentUser || !['Owner', 'Worker'].includes(currentUser.role)) {
+      window.location.href = '/login/login.html';
+    } else if (currentUser.role === 'Worker') {
+      const jobId = new URLSearchParams(window.location.search).get('id');
+      if (jobId) {
+        window.location.href = `/reallocate-worker/reallocate-worker.html?id=${encodeURIComponent(jobId)}`;
+      } else {
+        window.location.href = '/worker-view/worker-view.html';
+      }
+    }
+
+    function formatTime(value) {
+      if (!value) return '--';
+      if (typeof value === 'string' && /^([01]?\d|2[0-3]):[0-5]\d$/.test(value.trim())) {
+        const [h, m] = value.trim().split(':').map(Number);
+        const d = new Date();
+        d.setHours(h, m, 0, 0);
+        return d.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' });
+      }
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return '--';
+      return d.toLocaleTimeString('en-AU', {
+        timeZone: 'Australia/Brisbane',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    }
+
+    function formatDate(value) {
+      return new Date(`${value}T00:00:00`).toLocaleDateString('en-AU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function formatDuration(totalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (!hours) return `${minutes} min`;
+      return minutes ? `${hours} hr ${minutes} min` : `${hours} hr`;
+    }
+
+    async function loadCompletedJob() {
+      const jobId = new URLSearchParams(window.location.search).get('id');
+      if (!jobId) {
+        document.getElementById('job-title').textContent = 'Job not found';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/completed-details`);
+        const job = await response.json();
+        if (!response.ok) throw new Error(job.message || 'Unable to load completed job.');
+
+        document.title = `${job.title} | Completed Job | JobFlow`;
+        document.getElementById('job-title').textContent = job.title;
+        document.getElementById('job-status').textContent = job.hoursApprovalStatus === 'Approved'
+          ? 'Finished · Approved'
+          : 'Finished · Pending approval';
+        document.getElementById('job-description').textContent = job.description || 'No task description provided.';
+        document.getElementById('job-date').textContent = formatDate(job.date);
+        document.getElementById('job-location').textContent = job.location;
+        document.getElementById('worker-name').textContent = job.worker?.name || job.assignedWorker || 'Unassigned';
+        document.getElementById('client-name').textContent = job.clientName || 'Client';
+
+        const workerContact = document.getElementById('worker-contact');
+        workerContact.textContent = job.worker?.phone || job.worker?.email || 'No contact details';
+        if (job.worker?.phone) workerContact.href = `tel:${job.worker.phone}`;
+        else if (job.worker?.email) workerContact.href = `mailto:${job.worker.email}`;
+
+        const clientContact = document.getElementById('client-contact');
+        clientContact.textContent = job.clientPhone || 'No contact details';
+        if (job.clientPhone) clientContact.href = `tel:${job.clientPhone}`;
+
+        document.getElementById('scheduled-range').textContent = `${job.startTime} – ${job.endTime}`;
+        document.getElementById('actual-clock-in').textContent = formatTime(job.clockInAt) || '--';
+        document.getElementById('actual-clock-out').textContent = formatTime(job.clockOutAt) || '--';
+        document.getElementById('approved-clock-in').textContent = job.hoursApprovalStatus === 'Approved'
+          ? (formatTime(job.approvedClockInAt) || '--')
+          : 'Pending approval';
+        document.getElementById('approved-clock-out').textContent = job.hoursApprovalStatus === 'Approved'
+          ? (formatTime(job.approvedClockOutAt) || '--')
+          : 'Pending approval';
+        document.getElementById('approved-total').textContent = job.hoursApprovalStatus === 'Approved'
+          ? formatDuration(job.approvedMinutes)
+          : '--';
+        document.getElementById('approved-total-label').textContent = job.hoursApprovalStatus === 'Approved'
+          ? 'Total (Approved)'
+          : 'Total (Pending)';
+        document.getElementById('completion-note').textContent = job.completionNote || 'No completion note provided.';
+
+        const photoGallery = document.getElementById('photo-gallery');
+        const photos = job.completionPhotos || [];
+        document.getElementById('photo-empty').hidden = photos.length > 0;
+        photos.forEach(photo => {
+          const image = document.createElement('img');
+          image.src = photo.url;
+          image.alt = photo.alt || `${job.title} completed work photo`;
+          photoGallery.appendChild(image);
+        });
+      } catch (error) {
+        document.getElementById('job-title').textContent = 'Unable to load completed job';
+        document.getElementById('job-description').textContent = error.message;
+      }
+    }
+
+    if (currentUser && currentUser.role === 'Owner') loadCompletedJob();
+  </script>
+</body>
+</html>

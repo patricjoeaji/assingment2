@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workers | JobFlow</title>
+  <link rel="stylesheet" href="globals.css">
+  <link rel="stylesheet" href="owner-view/owner-view.css">
+  <link rel="stylesheet" href="workers.css">
+  <link rel="stylesheet" href="bottom-nav.css">
+  <script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="owner-view">
+  <div class="container-57">
+    <div class="div-wrapper-13"><div class="text-wrapper-124">9:41</div></div>
+    <div class="div-wrapper-13"><div class="text-wrapper-125">●●● Wi‑Fi ▰</div></div>
+  </div>
+
+  <main class="workers-page">
+    <header class="page-header">
+      <a class="schedule-link" href="/owner-view/owner-view.html">&larr; Schedule</a>
+      <a class="brand" href="/owner-view/owner-view.html" aria-label="JobFlow schedule">
+        <span class="brand-mark">J</span>
+        <span>JobFlow</span>
+      </a>
+    </header>
+
+    <div class="page-title-row">
+      <h1>Workers</h1>
+      <a class="add-button" href="/add-worker.html">＋ Add Worker</a>
+    </div>
+
+    <section class="worker-section" aria-labelledby="list-heading">
+      <div class="list-heading-row">
+        <h2 id="list-heading">All Workers</h2>
+        <span class="worker-count" id="worker-count"></span>
+      </div>
+      <input class="worker-search" id="worker-search" type="search" aria-label="Search workers" placeholder="Search workers">
+      <p class="list-message" id="list-message" role="status" aria-live="polite">Loading workers...</p>
+      <div class="worker-list" id="worker-list"></div>
+    </section>
+  </main>
+
+  <div class="navigation-6"></div>
+</div>
+
+  <dialog class="confirm-dialog" id="status-dialog" aria-labelledby="status-dialog-title" aria-describedby="status-dialog-copy">
+    <div class="dialog-content">
+      <p class="dialog-eyebrow">WORKER STATUS</p>
+      <h2 id="status-dialog-title">Confirm status change</h2>
+      <p id="status-dialog-copy"></p>
+      <p class="dialog-error" id="status-dialog-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="secondary-button" id="cancel-status" type="button">Cancel</button>
+        <button class="primary-button" id="confirm-status" type="button">Confirm</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="confirm-dialog" id="rate-dialog" aria-labelledby="rate-dialog-title">
+    <div class="dialog-content">
+      <p class="dialog-eyebrow">WORKER PAY</p>
+      <h2 id="rate-dialog-title">Hourly rate</h2>
+      <form id="rate-form">
+        <label for="hourly-rate">Hourly rate (AUD/hr)</label>
+        <input id="hourly-rate" type="number" min="0" step="0.01" inputmode="decimal">
+        <p class="dialog-error" id="rate-dialog-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button class="secondary-button" id="cancel-rate" type="button">Cancel</button>
+          <button class="primary-button" id="save-rate" type="submit">Save Rate</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script>
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (error) {
+      currentUser = null;
+    }
+
+    if (!currentUser || currentUser.role !== 'Owner') {
+      if (currentUser && currentUser.role === 'Worker') {
+        window.location.href = '/worker-view/worker-view.html';
+      } else {
+        window.location.href = '/login/login.html';
+      }
+    }
+
+    const workerList = document.getElementById('worker-list');
+    const listMessage = document.getElementById('list-message');
+    const workerCount = document.getElementById('worker-count');
+    const workerSearch = document.getElementById('worker-search');
+    const pageParams = new URLSearchParams(window.location.search);
+    const workerAdded = pageParams.get('added') === '1';
+    const newWorkerId = pageParams.get('workerId');
+    const statusDialog = document.getElementById('status-dialog');
+    const statusDialogTitle = document.getElementById('status-dialog-title');
+    const statusDialogCopy = document.getElementById('status-dialog-copy');
+    const statusDialogError = document.getElementById('status-dialog-error');
+    const confirmStatusButton = document.getElementById('confirm-status');
+    const rateDialog = document.getElementById('rate-dialog');
+    const rateDialogTitle = document.getElementById('rate-dialog-title');
+    const rateInput = document.getElementById('hourly-rate');
+    const rateDialogError = document.getElementById('rate-dialog-error');
+    const saveRateButton = document.getElementById('save-rate');
+    let pendingStatusChange = null;
+    let pendingRateWorker = null;
+    let allWorkers = [];
+    let lastDeactivatedWorkerId = null;
+    let lastActivatedWorkerId = null;
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function formatHourlyRate(value) {
+      if (value === null || value === undefined || value === '') return 'Not set';
+      return `${new Intl.NumberFormat('en-AU', {
+        style: 'currency',
+        currency: 'AUD'
+      }).format(value)}/hr`;
+    }
+
+    function renderWorkers() {
+      const query = workerSearch.value.trim().toLowerCase();
+      const visibleWorkers = allWorkers.filter(worker =>
+        [worker.name, worker.email, worker.phone]
+          .some(value => String(value || '').toLowerCase().includes(query))
+      );
+
+      workerCount.textContent = String(allWorkers.length);
+      if (!allWorkers.length) {
+        listMessage.textContent = 'No workers yet.';
+        workerList.replaceChildren();
+        return;
+      }
+
+      if (!visibleWorkers.length) {
+        listMessage.textContent = 'No workers match your search.';
+        workerList.replaceChildren();
+        return;
+      }
+
+      listMessage.textContent = '';
+      workerList.innerHTML = visibleWorkers.map(worker => `
+          <article class="worker-row${worker.isActive !== false && (worker.id === lastActivatedWorkerId || (!lastActivatedWorkerId && worker.id === newWorkerId)) ? ' is-recently-activated' : ''}${worker.isActive === false && worker.id === lastDeactivatedWorkerId ? ' is-recently-deactivated' : ''}">
+            <div class="worker-details">
+              <h3>${escapeHtml(worker.name)}</h3>
+              <p>${escapeHtml(worker.email)}</p>
+              <p>${escapeHtml(worker.phone || 'No phone added')}</p>
+              <div class="worker-rate">
+                <span>${escapeHtml(formatHourlyRate(worker.hourlyRate))}</span>
+                <button class="rate-edit-button" type="button" data-rate-worker-id="${escapeHtml(worker.id)}">Edit rate</button>
+              </div>
+            </div>
+            <div class="worker-actions">
+              <span class="status ${worker.isActive ? 'active' : 'inactive'}">
+                ${worker.isActive ? 'Active' : 'Inactive'}
+              </span>
+              <button class="status-button" type="button" data-worker-id="${escapeHtml(worker.id)}" data-next-active="${!worker.isActive}">
+                ${worker.isActive ? 'Deactivate' : 'Activate'}
+              </button>
+            </div>
+          </article>
+        `).join('');
+    }
+
+    async function loadWorkers() {
+      listMessage.textContent = 'Loading workers...';
+      workerList.replaceChildren();
+
+      try {
+        const response = await fetch('/api/workers');
+        const workers = await response.json();
+        if (!response.ok) throw new Error(workers.message || 'Unable to load workers.');
+
+        allWorkers = workers.sort((first, second) => {
+          const firstPinned = first.isActive !== false && (first.id === lastActivatedWorkerId || (!lastActivatedWorkerId && first.id === newWorkerId));
+          const secondPinned = second.isActive !== false && (second.id === lastActivatedWorkerId || (!lastActivatedWorkerId && second.id === newWorkerId));
+          if (firstPinned !== secondPinned) return firstPinned ? -1 : 1;
+          const activeOrder = Number(first.isActive === false) - Number(second.isActive === false);
+          if (activeOrder === 0 && first.isActive === false && second.isActive === false) {
+            if (first.id === lastDeactivatedWorkerId) return 1;
+            if (second.id === lastDeactivatedWorkerId) return -1;
+          }
+          return activeOrder || first.name.localeCompare(second.name);
+        });
+        renderWorkers();
+        if (workerAdded && !workerSearch.value.trim()) listMessage.textContent = 'Worker added.';
+      } catch (error) {
+        listMessage.textContent = error.message;
+      }
+    }
+
+    workerSearch.addEventListener('input', renderWorkers);
+
+    workerList.addEventListener('click', event => {
+      const rateButton = event.target.closest('[data-rate-worker-id]');
+      if (rateButton) {
+        pendingRateWorker = allWorkers.find(worker => worker.id === rateButton.dataset.rateWorkerId);
+        if (!pendingRateWorker) return;
+        rateDialogTitle.textContent = `Hourly rate · ${pendingRateWorker.name}`;
+        rateInput.value = pendingRateWorker.hourlyRate ?? '';
+        rateDialogError.textContent = '';
+        rateDialog.showModal();
+        return;
+      }
+
+      const button = event.target.closest('[data-worker-id]');
+      if (!button) return;
+
+      pendingStatusChange = {
+        id: button.dataset.workerId,
+        isActive: button.dataset.nextActive === 'true',
+        name: button.closest('.worker-row').querySelector('h3').textContent
+      };
+      const action = pendingStatusChange.isActive ? 'activate' : 'deactivate';
+      statusDialogTitle.textContent = `Confirm ${action}?`;
+      statusDialogCopy.textContent = pendingStatusChange.isActive
+        ? `${pendingStatusChange.name} will be able to sign in again.`
+        : `${pendingStatusChange.name} will no longer be able to sign in.`;
+      statusDialogError.textContent = '';
+      confirmStatusButton.textContent = `${action[0].toUpperCase()}${action.slice(1)} Worker`;
+      confirmStatusButton.classList.toggle('is-destructive', !pendingStatusChange.isActive);
+      statusDialog.showModal();
+    });
+
+    document.getElementById('cancel-status').addEventListener('click', () => {
+      pendingStatusChange = null;
+      statusDialog.close();
+    });
+
+    document.getElementById('cancel-rate').addEventListener('click', () => {
+      pendingRateWorker = null;
+      rateDialog.close();
+    });
+
+    document.getElementById('rate-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!pendingRateWorker) return;
+
+      const hourlyRate = rateInput.value === '' ? null : Number(rateInput.value);
+      if (hourlyRate !== null && (!Number.isFinite(hourlyRate) || hourlyRate < 0)) {
+        rateDialogError.textContent = 'Enter a valid non-negative hourly rate.';
+        return;
+      }
+
+      saveRateButton.disabled = true;
+      rateDialogError.textContent = '';
+
+      try {
+        const response = await fetch(`/api/workers/${encodeURIComponent(pendingRateWorker.id)}/rate`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hourlyRate })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to update hourly rate.');
+
+        allWorkers = allWorkers.map(worker => worker.id === result.worker.id ? result.worker : worker);
+        const updatedName = result.worker.name;
+        pendingRateWorker = null;
+        rateDialog.close();
+        renderWorkers();
+        listMessage.textContent = `Rate updated for ${updatedName}.`;
+      } catch (error) {
+        rateDialogError.textContent = error.message;
+      } finally {
+        saveRateButton.disabled = false;
+      }
+    });
+
+    confirmStatusButton.addEventListener('click', async () => {
+      if (!pendingStatusChange) return;
+
+      const { id, isActive } = pendingStatusChange;
+      confirmStatusButton.disabled = true;
+      statusDialogError.textContent = '';
+
+      try {
+        const response = await fetch(`/api/workers/${encodeURIComponent(id)}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isActive })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to update worker status.');
+        if (isActive) {
+          lastActivatedWorkerId = id;
+          lastDeactivatedWorkerId = null;
+        } else {
+          lastDeactivatedWorkerId = id;
+        }
+        pendingStatusChange = null;
+        statusDialog.close();
+        await loadWorkers();
+      } catch (error) {
+        statusDialogError.textContent = error.message;
+      } finally {
+        confirmStatusButton.disabled = false;
+      }
+    });
+
+    if (currentUser && currentUser.role === 'Owner') loadWorkers();
+  </script>
+</body>
+</html>

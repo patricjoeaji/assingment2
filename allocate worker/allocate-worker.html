@@ -1,0 +1,364 @@
+
+    <!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../globals.css">
+<link rel="stylesheet" href="allocate-worker.css">
+</head>
+<body>
+<div class="allocate-worker" data-model-id="16:678"><div class="section-wrapper" >
+    
+    <div class="section-7" ><div class="container-49" ><div class="div-wrapper-11" ><div class="text-wrapper-107" >9:41</div></div>
+<div class="div-wrapper-11" ><div class="text-wrapper-108" >●●● Wi‑Fi ▰</div></div></div>
+<header class="header-7" >
+  
+  <button
+  class="button-54"
+  type="button"
+  onclick="window.location.href='owner-view.html'"
+>
+  <div class="text-wrapper-109">‹</div>
+</button>
+
+<div class="bold-text-15" ><div class="text-wrapper-110" >Job Details</div></div>
+<button class="button-55" ><div class="text-wrapper-111" >Edit</div></button></header>
+<div class="container-50" ><div class="section-8" ><div class="container-51" ><div class="heading-wrapper" ><div class="heading-9" >
+  
+ <div class="text-wrapper-112" id="jobTitle">Hedge Trimming</div>
+
+</div></div>
+<div class="text-26" >
+
+  <div class="text-wrapper-113" id="jobStatus">Pending</div>
+
+</div></div>
+<div class="container-margin-23" ><div class="container-52" ><div class="text-27" >
+  
+<div class="text-wrapper-114" id="jobDate">▣ 20 May 2025</div>
+
+</div>
+<div class="text-28" >
+  
+  <p class="text-wrapper-114" id="jobTime">◷ 9:00 am – 12:00 pm (3 hrs)</p>
+
+</div>
+<div class="text-29" >
+  
+ <p class="text-wrapper-114" id="jobLocation">⌖ 12 Smith St, Brisbane QLD 4000</p>
+
+</div></div></div>
+<div class="paragraph-4" >
+  
+  <p class="do-the-hedge-2" id="jobDescription">Do the hedge trimming in the front yard and back yard.</p>
+
+</div></div>
+<div class="container-margin-24" ><div class="container-53" ><div class="div-wrapper-12" ><div class="text-wrapper-115" >Client contact</div></div>
+<div class="container-margin-25" ><div class="container-54" ><div class="text-30" >
+  
+ <div class="text-wrapper-116" id="clientInitials">CL</div>
+
+</div>
+<div class="text-31" ><div class="div-wrapper-12" >
+  
+  <div class="text-wrapper-117" id="clientName">Alex Johnson</div>
+
+</div>
+<div class="div-wrapper-12" >
+  
+ <div class="text-wrapper-118" id="clientPhone">0412 345 678</div>
+
+</div></div>
+
+<button
+  class="button-56"
+  type="button"
+  onclick="callClient()"
+>
+  <div class="text-wrapper-119">☎</div>
+</button>
+
+</div></div></div></div>
+<div class="container-margin-26" ></div>
+<div class="frame-wrapper" ><div class="frame-6" ><div class="container-55" ><div class="div-wrapper-12" ><div class="text-wrapper-115" >Assign worker</div></div>
+
+<div class="container-margin-25"><div class="container-56"><div class="button-57 worker-option" data-worker="Sarah Johnson" onclick="selectWorker('Sarah Johnson', this)"><div class="text-30"><div class="text-wrapper-120">SJ</div></div>
+
+<div class="text-31" ><div class="bold-text-16" ><div class="text-wrapper-121" >Sarah Johnson</div></div></div>
+<div class="text-32" ><div class="text-33" ></div></div></div>
+
+<div class="button-58 worker-option" data-worker="Mike Lee" onclick="selectWorker('Mike Lee', this)">
+  
+  <div class="text-30" ><div class="text-wrapper-122" >ML</div></div>
+<div class="text-31" ><div class="bold-text-16" ><div class="text-wrapper-121" >Mike Lee</div></div></div>
+<div class="text-34" ></div></div>
+
+<div class="button-59 worker-option" data-worker="Emma Brown" onclick="selectWorker('Emma Brown', this)">
+  
+  <div class="text-30" ><div class="text-wrapper-120" >EB</div></div>
+<div class="text-31" ><div class="bold-text-16" ><div class="text-wrapper-121" >Emma Brown</div></div></div>
+<div class="text-34" ></div></div>
+
+<div class="button-60 worker-option" data-worker="James Wilson" onclick="selectWorker('James Wilson', this)">
+
+  <div class="text-30" ><div class="text-wrapper-123" >JW</div></div>
+<div class="text-31" ><div class="bold-text-16" ><div class="text-wrapper-121" >James Wilson</div></div></div>
+<div class="text-34" ></div></div></div></div></div></div></div></div>
+
+<button
+  class="send-offer-wrapper"
+  style="border: none; outline: none;"
+  type="button"
+  onclick="sendOffer()"
+>
+  <div class="send-offer">Send&nbsp;&nbsp;Offer</div>
+</button>
+
+</div></div></div>
+<script>
+  let currentUser;
+  try {
+    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  } catch (e) {
+    currentUser = null;
+  }
+  if (!currentUser || currentUser.role !== 'Owner') {
+    if (currentUser && currentUser.role === 'Worker') {
+      window.location.href = '/worker-view/worker-view.html';
+    } else {
+      window.location.href = '/login/login.html';
+    }
+  }
+
+  function callClient() {
+    const phoneElement = document.getElementById('clientPhone');
+    const phoneNumber = phoneElement.textContent
+      .trim()
+      .replace(/[^\d+]/g, '');
+
+    if (!phoneNumber) {
+      alert('Client phone number is unavailable.');
+      return;
+    }
+
+    window.location.href = `tel:${phoneNumber}`;
+  }
+
+    let selectedWorker = 'Sarah Johnson';
+
+    function selectWorker(workerName, selectedElement) {
+    selectedWorker = workerName;
+
+    document.querySelectorAll('.worker-option').forEach(option => {
+  option.style.border = '1px solid #E4D8D0';
+  option.style.boxShadow = 'none';
+
+      const originalDot = option.querySelector('.text-33');
+
+      if (originalDot) {
+        originalDot.style.display = 'none';
+      }
+
+      const addedDot = option.querySelector('.selected-radio-dot');
+
+      if (addedDot) {
+        addedDot.remove();
+      }
+    });
+
+    selectedElement.style.border = '1px solid #E07A4F';
+    selectedElement.style.boxShadow = '0 0 0 1px #E07A4F';
+
+    const radioCircle = selectedElement.querySelector(
+      '.text-32, .text-34'
+    );
+
+    if (radioCircle) {
+      radioCircle.style.display = 'flex';
+      radioCircle.style.alignItems = 'center';
+      radioCircle.style.justifyContent = 'center';
+
+      const dot = document.createElement('div');
+
+      dot.className = 'selected-radio-dot';
+      dot.style.width = '10px';
+      dot.style.height = '10px';
+      dot.style.borderRadius = '50%';
+      dot.style.backgroundColor = '#E07A4F';
+
+      radioCircle.appendChild(dot);
+    }
+  }
+
+  async function sendOffer() {
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get('id');
+
+    if (!jobId) {
+      alert('Job ID is missing.');
+      return;
+    }
+
+    if (!selectedWorker) {
+      alert('Please select a worker.');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/jobs/${encodeURIComponent(jobId)}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            assignedWorker: selectedWorker,
+            status: 'Pending'
+          })
+        }
+      );
+
+      const updatedJob = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          updatedJob.message || 'Failed to send offer'
+        );
+      }
+
+      window.location.href =
+        `/job%20offer%20sent/job-offer-sent.html?id=${encodeURIComponent(updatedJob._id)}`;
+
+    } catch (error) {
+      console.error('Send offer error:', error);
+
+      alert(
+        error.message ||
+        'Unable to send job offer.'
+      );
+    }
+  }
+  function formatDate(dateValue) {
+    if (!dateValue) return '';
+
+    const date = new Date(`${dateValue}T00:00:00`);
+
+    return date.toLocaleDateString('en-AU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  function formatTime(timeValue) {
+    if (!timeValue) return '';
+
+    const parts = timeValue.split(':');
+    const hour = Number(parts[0]);
+    const minute = Number(parts[1]);
+
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+
+    return date.toLocaleTimeString('en-AU', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  function calculateHours(startTime, endTime) {
+    if (!startTime || !endTime) return '';
+
+    const startParts = startTime.split(':').map(Number);
+    const endParts = endTime.split(':').map(Number);
+
+    const startMinutes = startParts[0] * 60 + startParts[1];
+    const endMinutes = endParts[0] * 60 + endParts[1];
+
+    let durationMinutes = endMinutes - startMinutes;
+
+    if (durationMinutes < 0) {
+      durationMinutes += 24 * 60;
+    }
+
+    const hours = durationMinutes / 60;
+
+    return Number.isInteger(hours) ? hours : hours.toFixed(1);
+  }
+
+  async function loadJobDetails() {
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get('id');
+
+    if (!jobId) {
+      document.getElementById('jobTitle').textContent =
+        'Job not found';
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/jobs/${encodeURIComponent(jobId)}`
+      );
+
+      const job = await response.json();
+
+      if (!response.ok) {
+        throw new Error(job.message || 'Unable to load job');
+      }
+
+      const duration = calculateHours(
+        job.startTime,
+        job.endTime
+      );
+
+      document.getElementById('jobTitle').textContent =
+        job.title || 'Untitled Job';
+
+      document.getElementById('jobStatus').textContent =
+        job.status || 'Pending';
+
+      document.getElementById('jobDate').textContent =
+        `▣ ${formatDate(job.date)}`;
+
+      document.getElementById('jobTime').textContent =
+        `◷ ${formatTime(job.startTime)} – ${formatTime(job.endTime)} (${duration} hrs)`;
+
+      document.getElementById('jobLocation').textContent =
+        `⌖ ${job.location || ''}`;
+
+      document.getElementById('jobDescription').textContent =
+        job.description || 'No description provided.';
+
+      document.getElementById('clientName').textContent =
+        job.clientName || '';
+
+      document.getElementById('clientPhone').textContent =
+        job.clientPhone || '';
+
+      const initials = (job.clientName || '')
+        .split(' ')
+        .filter(Boolean)
+        .map(name => name.charAt(0))
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+
+      document.getElementById('clientInitials').textContent =
+        initials || 'CL';
+
+    } catch (error) {
+      console.error('Load job error:', error);
+
+      document.getElementById('jobTitle').textContent =
+        'Unable to load job';
+    }
+  }
+
+  loadJobDetails();
+</script>
+
+</body>
+</html>
