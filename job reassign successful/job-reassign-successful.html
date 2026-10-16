@@ -1,0 +1,205 @@
+
+    <!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../globals.css">
+<link rel="stylesheet" href="job-reassign-successful.css">
+<link rel="stylesheet" href="/bottom-nav.css">
+<script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="job-reassign-successful" data-model-id="21:1757"><div class="container-margin-4" ><div class="container-13" ><div class="container-14" ><div class="div-wrapper-5" ><div class="text-wrapper-23" >9:41</div></div>
+<div class="div-wrapper-5" ><div class="text-wrapper-24" >●●● Wi-Fi ▰</div></div></div>
+<div class="section-2" ><header class="header-2" >
+    
+   <button
+  class="button-23"
+    onclick="window.location.href='/owner-view/owner-view.html'"
+>
+  <div class="text-wrapper-25">‹</div>
+</button>
+
+<div class="bold-text-3" ><div class="text-wrapper-26" >Reassign Worker</div></div></header>
+<div class="container-15" ><div class="container-margin-5" ><div class="container-16" ><div class="text-wrapper-27" >✓</div></div></div>
+<div class="heading-2" ><div class="text-wrapper-28" >Worker reassigned!</div></div>
+<div class="paragraph-margin" ><div class="paragraph-2" ><p class="text-wrapper-29" >The job has been reassigned successfully.</p></div></div>
+<div class="container-margin-6" ><div class="container-17" ><div class="heading-3" ><div class="text-wrapper-30" >Job Details</div></div>
+<div class="container-margin-7" ><div class="container-18" ><div class="div-wrapper-5" ><div class="text-wrapper-31" >Job</div></div>
+
+<div class="bold-text-4"><div class="text-wrapper-32" id="jobTitle">Loading...</div></div>
+
+</div></div>
+<div class="container-19" ><div class="text-16" ><div class="text-wrapper-31" >Schedule</div></div>
+
+<div class="bold-text-5"><p class="text-wrapper-33" id="jobSchedule">Loading...</p></div>
+
+</div>
+<div class="container-19" ><div class="text-16" ><div class="text-wrapper-31" >Location</div></div>
+
+<div class="bold-text-5"><p class="text-wrapper-33" id="jobLocation">Loading...</p></div>
+
+</div>
+<div class="container-20" ><div class="text-16" ><div class="text-wrapper-31" >Status</div></div>
+
+<div class="bold-text-6"><div class="text-wrapper-34" id="jobStatus">Pending</div></div>
+
+</div>
+<div class="container-18" ><div class="div-wrapper-5" ><div class="text-wrapper-31" >New offer sent to</div></div>
+
+<div class="bold-text-4">
+
+ <div class="text-wrapper-32" id="newWorkerName">Loading...</div>
+
+</div>
+
+</div>
+<div class="container-21" ><div class="div-wrapper-5" ><div class="text-wrapper-31" >Reassigned on</div></div>
+
+<div class="bold-text-4"><div class="text-wrapper-32" id="reassignedDate">Loading...</div></div>
+
+</div></div></div>
+<div class="container-margin-8" ><div class="container-22" >
+    
+<button
+  class="button-24"
+  type="button"
+  onclick="viewJobDetails()"
+>
+  <div class="text-wrapper-35">View Job Details</div>
+</button>
+
+</div></div></div>
+<div class="navigation-2" ><div class="button-25" ><div class="text-wrapper-36" >▣</div>
+<div class="text-wrapper-37" >Calendar</div></div>
+<div class="button-26" ><div class="text-wrapper-38" >▤</div>
+<div class="text-wrapper-39" >Jobs</div></div>
+<div class="button-27" ><div class="text-wrapper-38" >♙</div>
+<div class="text-wrapper-39" >Workers</div></div>
+<div class="button-28" ><div class="text-wrapper-38" >☰</div>
+<div class="text-wrapper-39" >Menu</div></div></div></div></div></div></div>
+
+<script>
+  let currentUser;
+  try {
+    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  } catch (e) {
+    currentUser = null;
+  }
+  if (!currentUser || currentUser.role !== 'Owner') {
+    if (currentUser && currentUser.role === 'Worker') {
+      window.location.href = '/worker-view/worker-view.html';
+    } else {
+      window.location.href = '/login/login.html';
+    }
+  }
+
+  function getJobId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return '';
+
+    const date = dateValue.includes('T')
+      ? new Date(dateValue)
+      : new Date(`${dateValue}T00:00:00`);
+
+    return date.toLocaleDateString('en-AU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  function formatTime(timeValue) {
+    if (!timeValue) return '';
+
+    const parts = timeValue.split(':');
+    const hour = Number(parts[0]);
+    const minute = Number(parts[1]);
+
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+
+    return date.toLocaleTimeString('en-AU', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  function viewJobDetails() {
+    const jobId = getJobId();
+
+    if (!jobId) {
+      alert('Job ID is missing.');
+      return;
+    }
+
+    window.location.href =
+      `/reallocate-worker/reallocate-worker.html?id=${encodeURIComponent(jobId)}`;
+  }
+
+  async function loadReassignedJob() {
+    const jobId = getJobId();
+
+    if (!jobId) {
+      document.getElementById('jobTitle').textContent =
+        'Job not found';
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/jobs/${encodeURIComponent(jobId)}`
+      );
+
+      const job = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          job.message || 'Unable to load job'
+        );
+      }
+
+      document.getElementById('jobTitle').textContent =
+        job.title || 'Untitled Job';
+
+      const scheduleElement =
+        document.getElementById('jobSchedule');
+
+      scheduleElement.replaceChildren(
+        document.createTextNode(formatDate(job.date)),
+        document.createElement('br'),
+        document.createTextNode(
+          `${formatTime(job.startTime)} – ${formatTime(job.endTime)}`
+        )
+      );
+
+      document.getElementById('jobLocation').textContent =
+        job.location || '';
+
+      document.getElementById('jobStatus').textContent =
+        job.status || 'Pending';
+
+      document.getElementById('newWorkerName').textContent =
+        job.assignedWorker || 'No worker assigned';
+
+      document.getElementById('reassignedDate').textContent =
+        formatDate(job.updatedAt || new Date().toISOString());
+
+    } catch (error) {
+      console.error('Load reassigned job error:', error);
+
+      document.getElementById('jobTitle').textContent =
+        'Unable to load job';
+    }
+  }
+
+  loadReassignedJob();
+</script>
+
+</body>
+</html>

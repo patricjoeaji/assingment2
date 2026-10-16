@@ -1,0 +1,696 @@
+
+    <!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../globals.css">
+<link rel="stylesheet" href="reallocate-worker.css">
+</head>
+<body>
+<div class="reallocate-worker" data-model-id="13:659"><div class="resign-worker" ><div class="container-41" ><div class="div-wrapper-9" ><div class="text-wrapper-87" >9:41</div></div>
+<div class="div-wrapper-9" ><div class="text-wrapper-88" >●●● Wi‑Fi ▰</div></div></div>
+<div class="main-content" ><header class="header-6" >
+  
+ <button
+  class="button-49"
+  type="button"
+  onclick="backToCalendar()"
+>
+  <div class="text-wrapper-89">‹</div>
+</button>
+
+
+<div class="bold-text-13" ><div class="text-wrapper-90" >Job Details</div></div>
+
+<div class="small"><div class="text-wrapper-91" id="jobNumber">Job</div></div>
+
+</header>
+<div class="container-42" ><div class="section-6" ><div class="container-43" ><div class="heading-margin" ><div class="heading-8" >
+  
+ <div class="text-wrapper-92" id="jobTitle">Loading...</div>
+
+</div></div>
+<div class="text-18" >
+  
+  <div class="text-wrapper-93" id="jobStatus">Pending</div>
+
+</div></div>
+<div class="container-margin-18" ><div class="container-44" ><div class="text-19" >
+  
+<div class="text-wrapper-94" id="jobDate">Loading...</div>
+
+</div>
+<div class="text-20" >
+
+ <p class="text-wrapper-94" id="jobTime">Loading...</p>
+
+</div>
+<div class="text-21" >
+
+<p class="text-wrapper-94" id="jobLocation">Loading...</p>
+
+</div></div></div>
+<div class="do-the-hedge-wrapper" >
+  
+  <p class="do-the-hedge" id="jobDescription">Loading...</p>
+
+</div></div>
+<div class="container-margin-19" ></div>
+
+<button
+  class="reassign-send-offer-wrapper"
+  onclick="reassignWorker()"
+>
+  <div class="reassign-send-offer">Reassign &amp; Send Offer</div>
+</button>
+
+<div class="container-45 completion-client-card" id="completionClientCard">
+  <div class="div-wrapper-10"><div class="text-wrapper-95">Client contact</div></div>
+  <div class="container-margin-21">
+    <div class="container-48">
+      <div class="text-22"><div class="text-wrapper-103" id="clientInitials">CL</div></div>
+      <div class="text-23">
+        <div class="div-wrapper-10"><div class="text-wrapper-104" id="clientName">Loading...</div></div>
+        <div class="div-wrapper-10"><div class="text-wrapper-105" id="clientPhone">Loading...</div></div>
+      </div>
+      <button class="button-53" type="button" onclick="callClient()"><div class="text-wrapper-106">☎</div></button>
+    </div>
+  </div>
+</div>
+
+<div class="container-margin-20" ><div class="container-45" ><div class="div-wrapper-10" ><div class="text-wrapper-95" >Assign worker</div></div>
+<div class="container-margin-21" ><div class="container-46" >
+    
+   <div class="button-50" data-worker="Emma Brown" onclick="selectWorker(this, 'Emma Brown')">
+        
+        <div class="text-22" ><div class="text-wrapper-96" >EB</div></div>
+<div class="text-23" ><div class="bold-text-14" ><div class="text-wrapper-97" >Emma Brown</div></div></div>
+<div class="text-24" ></div></div>
+
+<div class="button-51" data-worker="Mike Lee" onclick="selectWorker(this, 'Mike Lee')">
+
+    <div class="text-22" ><div class="text-wrapper-98" >ML</div></div>
+<div class="text-23" ><div class="bold-text-14" ><div class="text-wrapper-97" >Mike Lee</div></div></div>
+<div class="text-24" ></div></div>
+
+<div class="container-margin-22" id="currentWorkerRow"><div class="container-47"><div class="text-22">
+  
+  <div class="text-wrapper-99" id="currentWorkerInitials">--</div>
+
+</div>
+<div class="text-23" ><div class="div-wrapper-10" >
+  
+ <div class="text-wrapper-100" id="currentWorkerName">Loading...</div>
+
+</div></div>
+
+<div class="text-wrapper-101" id="currentWorkerStatus">Pending</div>
+
+<div class="text-25" onclick="cancelWorker()" style="cursor: pointer;">
+  <div class="text-wrapper-102">Cancel</div>
+</div>
+
+</div></div>
+
+<div class="finished-hours" id="finishedHours" hidden>
+  <div class="finished-hours-field">
+    <span>Clock In</span>
+    <strong id="finishedClockIn">--</strong>
+    <small>Scheduled <span id="scheduledClockIn">--</span></small>
+  </div>
+  <div class="finished-hours-field">
+    <span>Clock Out</span>
+    <strong id="finishedClockOut">--</strong>
+    <small>Scheduled <span id="scheduledClockOut">--</span></small>
+  </div>
+  <div class="finished-hours-field finished-hours-total">
+    <span id="finishedTotalLabel">Total</span>
+    <strong id="finishedTotal">--</strong>
+  </div>
+</div>
+
+<div class="button-52" data-worker="James Wilson" onclick="selectWorker(this, 'James Wilson')">
+  <div class="text-22">
+    <div class="text-wrapper-96">JW</div>
+  </div>
+
+  <div class="text-23">
+    <div class="bold-text-14">
+      <div class="text-wrapper-97">James Wilson</div>
+    </div>
+  </div>
+
+  <div class="text-24"></div>
+</div>
+
+<div class="button-52" data-worker="Sarah Johnson" onclick="selectWorker(this, 'Sarah Johnson')">
+    
+    <div class="text-22" ><div class="text-wrapper-96" >SJ</div></div>
+<div class="text-23" ><div class="bold-text-14" ><div class="text-wrapper-97" >Sarah Johnson</div></div></div>
+<div class="text-24" ></div></div></div></div></div>
+
+<div class="container-45 completion-note-card" id="completionNoteCard" hidden>
+  <div class="div-wrapper-10"><div class="text-wrapper-95">Completion note</div></div>
+  <div class="container-margin-21">
+    <p class="completion-note-text" id="completionNoteText"></p>
+  </div>
+</div>
+
+<div class="container-45 completion-photos-card" id="completionPhotosCard" hidden>
+  <div class="div-wrapper-10"><div class="text-wrapper-95">Uploaded photos</div></div>
+  <div class="container-margin-21">
+    <div class="completion-photo-gallery" id="completionPhotoGallery"></div>
+  </div>
+</div>
+
+</div></div></div></div></div>
+
+<script>
+  let selectedWorker = null;
+
+  function backToCalendar() {
+    let currentUser;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    } catch (e) {
+      currentUser = null;
+    }
+    if (currentUser && currentUser.role === 'Worker') {
+      if (document.referrer && document.referrer.includes('/worker-view/')) {
+        window.location.href = document.referrer;
+      } else {
+        window.location.href = '/worker-view/worker-view.html';
+      }
+    } else {
+      if (document.referrer && document.referrer.includes('/owner-view/')) {
+        window.location.href = document.referrer;
+      } else {
+        window.location.href = '/owner-view/owner-view.html';
+      }
+    }
+  }
+
+  function getJobId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return '';
+
+    const date = new Date(`${dateValue}T00:00:00`);
+
+    return date.toLocaleDateString('en-AU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  function formatTime(timeValue) {
+    if (!timeValue) return '';
+
+    const parts = timeValue.split(':');
+    const hour = Number(parts[0]);
+    const minute = Number(parts[1]);
+
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+
+    return date.toLocaleTimeString('en-AU', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  function calculateHours(startTime, endTime) {
+    if (!startTime || !endTime) return '';
+
+    const startParts = startTime.split(':').map(Number);
+    const endParts = endTime.split(':').map(Number);
+
+    const startMinutes =
+      startParts[0] * 60 + startParts[1];
+
+    const endMinutes =
+      endParts[0] * 60 + endParts[1];
+
+    let durationMinutes = endMinutes - startMinutes;
+
+    if (durationMinutes < 0) {
+      durationMinutes += 24 * 60;
+    }
+
+    const hours = durationMinutes / 60;
+
+    return Number.isInteger(hours)
+      ? hours
+      : hours.toFixed(1);
+  }
+
+  function formatRecordedTime(value) {
+    if (!value || Number.isNaN(new Date(value).getTime())) return '--';
+
+    return new Date(value).toLocaleTimeString('en-AU', {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: 'Australia/Brisbane'
+    });
+  }
+
+  function formatDuration(totalMinutes) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (!hours) return `${minutes} min`;
+    return minutes ? `${hours} hr ${minutes} min` : `${hours} hr`;
+  }
+
+  function updateFinishedHours(job) {
+    const isApproved = job.hoursApprovalStatus === 'Approved';
+    const clockIn = isApproved
+      ? (job.approvedClockInAt || job.clockInAt)
+      : job.clockInAt;
+    const clockOut = isApproved
+      ? (job.approvedClockOutAt || job.clockOutAt)
+      : job.clockOutAt;
+    const clockInSource = isApproved && job.approvedClockInAt
+      ? job.approvedClockInSource
+      : 'actual';
+    const clockOutSource = isApproved && job.approvedClockOutAt
+      ? job.approvedClockOutSource
+      : 'actual';
+
+    const clockInElem = document.getElementById('finishedClockIn');
+    const clockOutElem = document.getElementById('finishedClockOut');
+    const totalLabelElem = document.getElementById('finishedTotalLabel');
+    const totalElem = document.getElementById('finishedTotal');
+
+    clockInElem.textContent = clockIn ? formatRecordedTime(clockIn) : '--';
+    clockOutElem.textContent = clockOut ? formatRecordedTime(clockOut) : '--';
+
+    if (clockIn && clockInSource) {
+      clockInElem.title = `${clockInSource[0].toUpperCase() + clockInSource.slice(1)}: ${formatRecordedTime(clockIn)}`;
+    } else {
+      clockInElem.removeAttribute('title');
+    }
+
+    if (clockOut && clockOutSource) {
+      clockOutElem.title = `${clockOutSource[0].toUpperCase() + clockOutSource.slice(1)}: ${formatRecordedTime(clockOut)}`;
+    } else {
+      clockOutElem.removeAttribute('title');
+    }
+
+    if (totalLabelElem) {
+      totalLabelElem.textContent = isApproved ? 'Total (Approved)' : 'Total (Pending)';
+    }
+
+    document.getElementById('scheduledClockIn').textContent = formatTime(job.startTime);
+    document.getElementById('scheduledClockOut').textContent = formatTime(job.endTime);
+
+    const totalMinutes = clockIn && clockOut
+      ? Math.max(0, Math.round((new Date(clockOut) - new Date(clockIn)) / 60000))
+      : null;
+    totalElem.textContent = totalMinutes === null
+      ? '--'
+      : formatDuration(totalMinutes);
+  }
+
+  function adjustPageHeight() {
+    // Content flows normally via standard document layout inside scrollable .main-content
+  }
+
+  function updateCompletionDetails(job) {
+    const isFinished = String(job?.status || '').toLowerCase() === 'finished';
+    const noteCard = document.getElementById('completionNoteCard');
+    const noteText = document.getElementById('completionNoteText');
+    const photosCard = document.getElementById('completionPhotosCard');
+    const photoGallery = document.getElementById('completionPhotoGallery');
+
+    const note = String(job?.completionNote || '').trim();
+    if (isFinished && note) {
+      noteText.textContent = note;
+      noteCard.hidden = false;
+    } else {
+      noteCard.hidden = true;
+      noteText.textContent = '';
+    }
+
+    photoGallery.replaceChildren();
+    const rawPhotos = Array.isArray(job?.completionPhotos) ? job.completionPhotos : [];
+    const validPhotos = rawPhotos.filter(Boolean);
+
+    if (isFinished && validPhotos.length > 0) {
+      validPhotos.forEach((photo, idx) => {
+        const filename = typeof photo === 'string' ? photo : (photo.filename || photo.name || '');
+        const url = (typeof photo === 'object' && photo.url)
+          ? photo.url
+          : `/api/completed-jobs/${encodeURIComponent(job._id)}/photos/${encodeURIComponent(filename)}`;
+
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = (typeof photo === 'object' && photo.alt) || `Uploaded photo ${idx + 1}`;
+        img.title = 'Click to open full photo';
+        img.onload = adjustPageHeight;
+        img.addEventListener('click', () => {
+          window.open(url, '_blank');
+        });
+        photoGallery.appendChild(img);
+      });
+      photosCard.hidden = false;
+    } else {
+      photosCard.hidden = true;
+    }
+
+    adjustPageHeight();
+  }
+
+  function getInitials(name) {
+    if (!name) return '--';
+
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .map(part => part.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  }
+  function updateWorkerOptions(currentWorker) {
+    const isFinished = document
+      .querySelector('.reallocate-worker')
+      .classList.contains('is-finished');
+    const workerOrder = [
+      'Sarah Johnson',
+      'Mike Lee',
+      'Emma Brown',
+      'James Wilson'
+    ];
+
+    const options = Array
+      .from(document.querySelectorAll('[data-worker]'))
+      .sort((first, second) => {
+        return (
+          workerOrder.indexOf(first.dataset.worker) -
+          workerOrder.indexOf(second.dataset.worker)
+        );
+      });
+
+    let nextRow = currentWorker ? 2 : 1;
+
+    options.forEach(option => {
+      const isCurrentWorker =
+        option.dataset.worker === currentWorker;
+
+      if (isCurrentWorker) {
+        option.style.display = 'none';
+        return;
+      }
+
+      option.style.display = isFinished ? 'none' : 'grid';
+      option.style.gridRow =
+        `${nextRow} / ${nextRow + 1}`;
+
+      nextRow += 1;
+    });
+  }
+  function callClient() {
+    const phoneNumber = document
+      .getElementById('clientPhone')
+      .textContent
+      .trim()
+      .replace(/[^\d+]/g, '');
+
+    if (!phoneNumber) {
+      alert('Client phone number is unavailable.');
+      return;
+    }
+
+    window.location.href = `tel:${phoneNumber}`;
+  }
+
+  function selectWorker(element, workerName) {
+    document
+      .querySelectorAll('.button-50, .button-51, .button-52')
+      .forEach(item => {
+        item.style.border = '1px solid #E4D8D0';
+        item.style.boxShadow = 'none';
+
+        const circle = item.querySelector('.text-24');
+
+        if (circle) {
+          circle.innerHTML = '';
+        }
+      });
+
+    element.style.border = '1px solid #E07A4F';
+    element.style.boxShadow = '0 0 0 1px #E07A4F';
+
+    const selectedCircle =
+      element.querySelector('.text-24');
+
+    if (selectedCircle) {
+      selectedCircle.innerHTML =
+        '<div class="selected-dot"></div>';
+    }
+
+    selectedWorker = workerName;
+  }
+
+    async function cancelWorker() {
+    const jobId = getJobId();
+
+    if (!jobId) {
+      alert('Job ID is missing.');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/jobs/${encodeURIComponent(jobId)}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            assignedWorker: null,
+            status: 'Pending'
+          })
+        }
+      );
+
+      const updatedJob = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          updatedJob.message || 'Unable to cancel offer'
+        );
+      }
+
+      document.getElementById(
+        'currentWorkerRow'
+      ).style.display = 'none';
+
+            document
+        .querySelectorAll('[data-worker]')
+        .forEach(option => {
+          option.style.border = '1px solid #E4D8D0';
+          option.style.boxShadow = 'none';
+
+          const circle = option.querySelector('.text-24');
+
+          if (circle) {
+            circle.innerHTML = '';
+          }
+        });
+
+      updateWorkerOptions(null);
+      selectedWorker = null;
+
+    } catch (error) {
+      console.error('Cancel worker error:', error);
+      alert(error.message || 'Unable to cancel offer.');
+    }
+  }
+  async function reassignWorker() {
+    const jobId = getJobId();
+
+    if (!jobId) {
+      alert('Job ID is missing.');
+      return;
+    }
+
+    if (!selectedWorker) {
+      alert('Please select a worker first.');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/jobs/${encodeURIComponent(jobId)}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            assignedWorker: selectedWorker,
+            status: 'Pending'
+          })
+        }
+      );
+
+      const updatedJob = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          updatedJob.message || 'Unable to reassign worker'
+        );
+      }
+
+      window.location.href =
+        `/job%20reassign%20successful/job-reassign-successful.html?id=${encodeURIComponent(updatedJob._id)}`;
+
+    } catch (error) {
+      console.error('Reassign worker error:', error);
+      alert(error.message || 'Unable to reassign worker.');
+    }
+  }
+
+  async function loadJobDetails() {
+    const jobId = getJobId();
+
+    if (!jobId) {
+      document.getElementById('jobTitle').textContent =
+        'Job not found';
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/jobs/${encodeURIComponent(jobId)}`
+      );
+
+      if (response.status === 401) {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = '/login/login.html';
+        return;
+      }
+      if (response.status === 403) {
+        let curUser;
+        try { curUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null'); } catch (e) { curUser = null; }
+        if (curUser && curUser.role === 'Worker') {
+          alert('This job is not assigned to you.');
+          window.location.href = '/worker-view/worker-view.html';
+          return;
+        } else {
+          sessionStorage.removeItem('currentUser');
+          window.location.href = '/login/login.html';
+          return;
+        }
+      }
+
+      const job = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          job.message || 'Unable to load job'
+        );
+      }
+
+      let currentUser;
+      try {
+        currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+      } catch (e) {
+        currentUser = null;
+      }
+      if (currentUser && currentUser.role === 'Worker' && String(job.status).toLowerCase() !== 'finished') {
+        window.location.href = `/job%20details-worker/job-details-worker.html?id=${encodeURIComponent(job._id)}`;
+        return;
+      }
+
+      const duration = calculateHours(
+        job.startTime,
+        job.endTime
+      );
+
+      document.getElementById('jobNumber').textContent =
+        `Job #${job._id.slice(-4).toUpperCase()}`;
+
+      document.getElementById('jobTitle').textContent =
+        job.title || 'Untitled Job';
+
+      document.getElementById('jobStatus').textContent =
+        job.status || 'Pending';
+
+      document.getElementById('jobDate').textContent =
+        `▣ ${formatDate(job.date)}`;
+
+      document.getElementById('jobTime').textContent =
+        `◷ ${formatTime(job.startTime)} – ${formatTime(job.endTime)} (${duration} hrs)`;
+
+      document.getElementById('jobLocation').textContent =
+        `⌖ ${job.location || ''}`;
+
+      document.getElementById('jobDescription').textContent =
+        job.description || 'No description provided.';
+
+           const workerName =
+        job.assignedWorker || 'No worker assigned';
+
+      document.getElementById(
+        'currentWorkerName'
+      ).textContent = workerName;
+
+      document.getElementById(
+        'currentWorkerInitials'
+      ).textContent = getInitials(job.assignedWorker);
+
+      document.getElementById(
+        'currentWorkerStatus'
+      ).textContent = job.assignedWorker
+        ? (job.status || 'Pending')
+        : 'Unassigned';
+
+      const currentWorkerStatus = document.getElementById('currentWorkerStatus');
+      const cancelWorkerAction = document.querySelector('#currentWorkerRow .text-25');
+      const isFinished = String(job.status).toLowerCase() === 'finished';
+      currentWorkerStatus.classList.toggle('is-finished', isFinished);
+      cancelWorkerAction.hidden = isFinished;
+      document.querySelector('.reallocate-worker').classList.toggle('is-finished', isFinished);
+      document.getElementById('finishedHours').hidden = !isFinished;
+      if (isFinished) updateFinishedHours(job);
+      updateCompletionDetails(job);
+
+      const currentWorkerRow =
+        document.getElementById('currentWorkerRow');
+
+      currentWorkerRow.style.display =
+        job.assignedWorker ? '' : 'none';
+
+           updateWorkerOptions(job.assignedWorker);
+
+      document.getElementById('clientName').textContent =
+        job.clientName || '';
+
+      document.getElementById('clientPhone').textContent =
+        job.clientPhone || '';
+
+      document.getElementById(
+        'clientInitials'
+      ).textContent = getInitials(job.clientName);
+
+    } catch (error) {
+      console.error('Load job error:', error);
+
+      document.getElementById('jobTitle').textContent =
+        'Unable to load job';
+    }
+  }
+
+  window.addEventListener('resize', adjustPageHeight);
+  loadJobDetails();
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+.app-bottom-nav {
+  position: fixed;
+  z-index: 1000;
+  bottom: var(--nav-bottom, 0px);
+  left: var(--nav-left, 0px);
+  display: grid;
+  width: min(var(--nav-width, 393px), 100vw);
+  height: calc(58px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  grid-template-columns: repeat(var(--nav-items, 5), minmax(0, 1fr));
+  align-items: stretch;
+  padding: 0 4px env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid #eadfd5;
+  background: #fffdf9f5;
+}
+
+.worker-view .app-bottom-nav,
+.owner-view .app-bottom-nav {
+  position: absolute;
+  top: auto;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+.app-bottom-nav-item {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #8b7e74;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-bottom-nav-item:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid #d9784f;
+  outline-offset: -3px;
+  border-radius: 6px;
+}
+
+.app-bottom-nav-icon {
+  display: block;
+  min-height: 18px;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+}
+
+.app-bottom-nav-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.app-bottom-nav-label {
+  overflow: hidden;
+  max-width: 100%;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-bottom-nav-item.is-active {
+  color: #d9784f;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-bottom-nav-item {
+    transition: color 120ms ease-out;
+  }
+}

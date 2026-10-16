@@ -1,0 +1,378 @@
+
+    <!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../globals.css">
+<link rel="stylesheet" href="owner-view-empty.css">
+<link rel="stylesheet" href="/bottom-nav.css">
+<script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="owner-view-empty" data-model-id="19:1305"><div class="frame" ><div class="section" ><header class="header" ><button class="button" ><div class="text-wrapper" >☰</div></button>
+<div class="bold-text" ><div class="div" >Calendar</div></div>
+<button class="div-wrapper" ><div class="text-wrapper-2" >♢</div></button></header>
+<div class="container-margin" ><div class="container" ><button class="button-2" ><div class="text-wrapper-2" >‹</div></button>
+<div class="bold-text-2" >
+  
+ <p class="p" id="dateRange">1 Sep – 14 Sep, 2026</p>
+
+</div>
+<button class="button-3" ><div class="text-wrapper-2" >›</div></button>
+
+</div></div>
+<div class="container-wrapper" ><div class="container-2" ><div class="container-3" ><div class="text" ><div class="text-wrapper-3" >MON</div></div>
+<div class="text-2" ><div class="text-wrapper-3" >TUE</div></div>
+<div class="text-3" ><div class="text-wrapper-3" >WED</div></div>
+<div class="text-4" ><div class="text-wrapper-3" >THU</div></div>
+<div class="text-5" ><div class="text-wrapper-3" >FRI</div></div>
+<div class="text-6" ><div class="text-wrapper-3" >SAT</div></div>
+<div class="text-7" ><div class="text-wrapper-3" >SUN</div></div></div>
+
+<div class="container-margin-2"><div class="container-4" id="calendarDays">
+
+  <button class="button-4" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-4" >12</div></div></div>
+<div class="italic-text-wrapper" ><div class="italic-text" ></div></div></button>
+<button class="button-5" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-4" >13</div></div></div>
+<div class="text-9" ><div class="italic-text" ></div></div></button>
+<button class="button-6" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-5" >14</div></div></div>
+<div class="text-9" ><div class="italic-text-2" ></div></div></button>
+<button class="button-7" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-4" >15</div></div></div>
+<div class="text-9" ><div class="italic-text-2" ></div></div></button>
+<button class="button-8" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-4" >16</div></div></div>
+<div class="text-9" ><div class="italic-text-3" ></div></div></button>
+<button class="button-9" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-4" >17</div></div></div>
+<div class="text-9" ><div class="italic-text" ></div></div></button>
+<button class="button-10" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-4" >18</div></div></div>
+<div class="text-9" ><div class="italic-text-2" ></div></div></button>
+<button class="button-11" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-4" >19</div></div></div>
+<div class="italic-text-wrapper" ><div class="italic-text-3" ></div></div></button>
+<button class="button-12" ><div class="div-wrapper-2" ><div class="text-10" ><div class="text-wrapper-6" >20</div></div></div>
+<div class="text-9" ><div class="italic-text" ></div>
+<div class="italic-text-2" ></div>
+<div class="italic-text-3" ></div></div></button>
+<button class="button-13" ><div class="ellipse" ></div>
+<div class="div-wrapper-2" ><div class="text-11" ><div class="text-wrapper-7" >21</div></div></div>
+<div class="text-12" ></div></button>
+<button class="button-14" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-6" >22</div></div></div>
+<div class="text-9" ><div class="italic-text" ></div></div></button>
+<button class="button-15" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-6" >23</div></div></div>
+<div class="text-9" ><div class="italic-text-2" ></div></div></button>
+<button class="button-16" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-6" >24</div></div></div>
+<div class="text-9" ><div class="italic-text-2" ></div></div></button>
+<button class="button-17" ><div class="div-wrapper-2" ><div class="text-8" ><div class="text-wrapper-6" >25</div></div></div>
+<div class="text-9" ><div class="italic-text-3" ></div></div></button></div></div></div></div>
+
+<div class="container-margin-3">
+  <div class="container-5">
+
+    <div class="container-6">
+      <div class="text-13">
+        <div class="italic-text-4"></div>
+        <div class="text-wrapper-8">Pending</div>
+      </div>
+      <div class="text-wrapper-9" id="pendingCount">0</div>
+    </div>
+
+    <div class="container-7">
+      <div class="text-14">
+        <div class="italic-text-5"></div>
+        <div class="text-wrapper-8">Accepted</div>
+      </div>
+      <div class="text-wrapper-9" id="acceptedCount">0</div>
+    </div>
+
+    <div class="container-8">
+      <div class="text-15">
+        <div class="italic-text-6"></div>
+        <div class="text-wrapper-8">Declined</div>
+      </div>
+      <div class="text-wrapper-9" id="declinedCount">0</div>
+    </div>
+
+    <div class="container-9">
+      <div class="text-wrapper-10">Total jobs</div>
+      <div class="text-wrapper-9" id="totalCount">0</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="container-10">
+  <div class="div-wrapper-3">
+    <div class="text-wrapper-11" id="selectedDateTitle">Loading...</div>
+  </div>
+
+  <div class="div-wrapper-3">
+    <div class="text-wrapper-12" id="selectedJobCount">0 jobs</div>
+  </div>
+</div>
+
+<div class="container-jobflow" ><div class="div-wrapper-2" ><div class="container-11" ><div class="text-wrapper-13" >▣</div></div></div>
+<div class="heading" ><div class="text-wrapper-14" >No jobs scheduled</div></div>
+<div class="paragraph" ><p class="text-wrapper-15" >There are no jobs for this day.</p></div>
+
+<div class="button-wrapper">
+  <button
+    class="button-18"
+    onclick="window.location.href='create-job.html'"
+  >
+    <div class="text-wrapper-16">+ Create Job</div>
+  </button>
+</div>
+
+</div>
+
+<div class="navigation" ><div class="button-19" ><div class="text-wrapper-17" >▣</div>
+<div class="text-wrapper-18" >Calendar</div></div>
+<div class="button-20" ><div class="text-wrapper-19" >▤</div>
+<div class="text-wrapper-20" >Jobs</div></div>
+<div class="button-21" ><div class="text-wrapper-19" >♙</div>
+<div class="text-wrapper-20" >Workers</div></div>
+<div class="button-22" ><div class="text-wrapper-19" >☰</div>
+<div class="text-wrapper-20" >Menu</div></div></div></div>
+<div class="container-12" ><div class="div-wrapper-4" ><div class="text-wrapper-21" >9:41</div></div>
+<div class="div-wrapper-4" ><div class="text-wrapper-22" >●●● Wi‑Fi ▰</div></div></div>
+<div class="frame-2" ><div class="div-wrapper-4" ><div class="text-wrapper-21" >9:41</div></div>
+<div class="div-wrapper-4" ><div class="text-wrapper-22" >●●● Wi‑Fi ▰</div></div></div></div></div>
+
+<script>
+  let currentUser;
+  try {
+    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  } catch (e) {
+    currentUser = null;
+  }
+  if (!currentUser || currentUser.role !== 'Owner') {
+    if (currentUser && currentUser.role === 'Worker') {
+      window.location.href = '/worker-view/worker-view.html';
+    } else {
+      window.location.href = '/login/login.html';
+    }
+  }
+
+  const calendarStart = '2026-09-01';
+  const calendarDaysCount = 14;
+
+  let allJobs = [];
+  let selectedDate = null;
+
+  function normaliseStatus(status) {
+    return String(status || 'Pending').toLowerCase();
+  }
+
+  function formatDateKey(date) {
+    const year = date.getFullYear();
+    const month =
+      String(date.getMonth() + 1).padStart(2, '0');
+    const day =
+      String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  function createDateFromKey(dateKey) {
+    return new Date(`${dateKey}T00:00:00`);
+  }
+
+  function formatSelectedDate(dateKey) {
+    return createDateFromKey(dateKey)
+      .toLocaleDateString('en-AU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      });
+  }
+
+  function getJobsForDate(dateKey) {
+    return allJobs.filter(job => job.date === dateKey);
+  }
+
+  function getDotClass(status) {
+    const normalised = normaliseStatus(status);
+
+    if (normalised === 'accepted') {
+      return 'italic-text-2';
+    }
+
+    if (normalised === 'declined') {
+      return 'italic-text-3';
+    }
+
+    return 'italic-text';
+  }
+
+  function renderCalendar() {
+    const container =
+      document.getElementById('calendarDays');
+
+    container.innerHTML = '';
+
+    const startDate =
+      createDateFromKey(calendarStart);
+
+    for (
+      let index = 0;
+      index < calendarDaysCount;
+      index += 1
+    ) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + index);
+
+      const dateKey = formatDateKey(date);
+      const jobs = getJobsForDate(dateKey);
+      const isSelected = dateKey === selectedDate;
+
+      const button = document.createElement('button');
+      button.className = `button-${4 + index}`;
+      button.type = 'button';
+
+      const statuses = [
+        ...new Set(
+          jobs.map(job => normaliseStatus(job.status))
+        )
+      ];
+
+      const dots = statuses
+        .map(status => {
+          return `<div class="${getDotClass(status)}"></div>`;
+        })
+        .join('');
+
+      button.innerHTML = `
+        ${isSelected ? '<div class="ellipse"></div>' : ''}
+
+        <div class="div-wrapper-2">
+          <div class="${isSelected ? 'text-11' : 'text-8'}">
+            <div class="${isSelected ? 'text-wrapper-7' : 'text-wrapper-4'}">
+              ${date.getDate()}
+            </div>
+          </div>
+        </div>
+
+        <div class="text-9">
+          ${dots}
+        </div>
+      `;
+
+      button.addEventListener('click', () => {
+        if (jobs.length > 0) {
+          window.location.href =
+            `owner-view.html?date=${encodeURIComponent(dateKey)}`;
+          return;
+        }
+
+        selectedDate = dateKey;
+
+        window.history.replaceState(
+          {},
+          '',
+          `owner-view-empty.html?date=${encodeURIComponent(dateKey)}`
+        );
+
+        renderCalendar();
+        renderEmptyDate();
+      });
+
+      container.appendChild(button);
+    }
+  }
+
+  function renderStatistics() {
+    const endDate =
+      createDateFromKey(calendarStart);
+
+    endDate.setDate(
+      endDate.getDate() + calendarDaysCount - 1
+    );
+
+    const endKey = formatDateKey(endDate);
+
+    const rangeJobs = allJobs.filter(job => {
+      return (
+        job.date >= calendarStart &&
+        job.date <= endKey
+      );
+    });
+
+    const pending = rangeJobs.filter(job => {
+      return normaliseStatus(job.status) === 'pending';
+    }).length;
+
+    const accepted = rangeJobs.filter(job => {
+      return normaliseStatus(job.status) === 'accepted';
+    }).length;
+
+    const declined = rangeJobs.filter(job => {
+      return normaliseStatus(job.status) === 'declined';
+    }).length;
+
+    document.getElementById('pendingCount').textContent =
+      pending;
+
+    document.getElementById('acceptedCount').textContent =
+      accepted;
+
+    document.getElementById('declinedCount').textContent =
+      declined;
+
+    document.getElementById('totalCount').textContent =
+      rangeJobs.length;
+  }
+
+  function renderEmptyDate() {
+    document.getElementById(
+      'selectedDateTitle'
+    ).textContent = formatSelectedDate(selectedDate);
+
+    document.getElementById(
+      'selectedJobCount'
+    ).textContent = '0 jobs';
+  }
+
+  async function loadEmptyCalendar() {
+    try {
+      const response = await fetch('/api/jobs');
+      const jobs = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          jobs.message || 'Unable to load jobs'
+        );
+      }
+
+      allJobs = jobs;
+
+      const params =
+        new URLSearchParams(window.location.search);
+
+      selectedDate =
+        params.get('date') || '2026-09-04';
+
+      if (getJobsForDate(selectedDate).length > 0) {
+        window.location.href =
+          `owner-view.html?date=${encodeURIComponent(selectedDate)}`;
+        return;
+      }
+
+      document.getElementById('dateRange').textContent =
+        '1 Sep – 14 Sep, 2026';
+
+      renderCalendar();
+      renderStatistics();
+      renderEmptyDate();
+
+    } catch (error) {
+      console.error('Empty calendar error:', error);
+
+      document.getElementById(
+        'selectedDateTitle'
+      ).textContent = 'Unable to load jobs';
+    }
+  }
+
+  loadEmptyCalendar();
+</script>
+</body>
+</html>
