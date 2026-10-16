@@ -1,0 +1,611 @@
+.job-offer-sent {
+  width: min(100%, 393px);
+  min-height: 852px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.job-offer-sent .container-margin-13 {
+  display: inline-flex;
+  width: 100%;
+  max-width: 393px;
+  height: 852px;
+  position: relative;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.job-offer-sent .container-31 {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 393px;
+  height: 852px;
+  align-items: flex-start;
+  position: relative;
+  background-color: #f8f4ee;
+  border-radius: 30px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid;
+  border-color: #e7e0d9;
+  box-shadow: 0px 18px 45px #3c302814;
+}
+
+.job-offer-sent .container-32 {
+  display: flex;
+  height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 18px 0px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+}
+
+.job-offer-sent .div-wrapper-8 {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .text-wrapper-70 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 900;
+  color: #3f372f;
+  font-size: 11px;
+  letter-spacing: 0.06px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .text-wrapper-71 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #3f372f;
+  font-size: 11px;
+  letter-spacing: 0.06px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .section-5 {
+  display: flex;
+  flex-direction: column;
+  min-height: 820px;
+  align-items: flex-start;
+  padding: 10px 16px 80px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .header-5 {
+  display: grid;
+  grid-template-columns: 42px 275px;
+  grid-template-rows: 46px;
+  height: 46px;
+  background-color: transparent;
+}
+
+.job-offer-sent .button-43 {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  align-self: center;
+  width: 100%;
+  height: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+}
+
+.job-offer-sent .text-wrapper-72 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Arial-Regular", Helvetica;
+  font-weight: 400;
+  color: #000000;
+  font-size: 20px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .bold-text-9 {
+  position: relative;
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+  align-self: center;
+  width: 100%;
+  height: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.job-offer-sent .text-wrapper-73 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #3f372f;
+  font-size: 15px;
+  text-align: center;
+  letter-spacing: -0.23px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .container-33 {
+  display: flex;
+  flex-direction: column;
+  width: 359px;
+  align-items: flex-start;
+  padding: 65px 0px 0px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .container-margin-14 {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .container-34 {
+  display: flex;
+  width: 78px;
+  height: 78px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: #e8f5ec;
+  border-radius: 39px;
+}
+
+.job-offer-sent .text-wrapper-74 {
+  position: relative;
+  width: fit-content;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #279052;
+  font-size: 42px;
+  text-align: center;
+  letter-spacing: 0.37px;
+  line-height: normal;
+}
+
+.job-offer-sent .heading-6 {
+  width: 359px;
+  height: 52px;
+  align-items: center;
+  padding: 22px 0px 0px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.job-offer-sent .text-wrapper-75 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #3f372f;
+  font-size: 25px;
+  text-align: center;
+  letter-spacing: 0.14px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .paragraph-margin-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0px 0px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .text-wrapper-76 {
+  position: relative;
+  width: 280px;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 400;
+  color: #8a7d73;
+  font-size: 13px;
+  text-align: center;
+  letter-spacing: -0.08px;
+  line-height: 19.5px;
+}
+
+.job-offer-sent .container-margin-15 {
+  align-items: flex-start;
+  padding: 26px 0px 0px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .container-35 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 14px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  background-color: #fffdf9;
+  border-radius: 16px;
+  border: 1px solid;
+  border-color: #eadfd5;
+}
+
+.job-offer-sent .heading-7 {
+  align-items: flex-start;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.job-offer-sent .text-wrapper-77 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #3f372f;
+  font-size: 13px;
+  letter-spacing: -0.08px;
+  line-height: normal;
+}
+
+.job-offer-sent .container-margin-16 {
+  align-items: flex-start;
+  padding: 13px 0px 0px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .container-36 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 0px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-color: #eadfd5;
+}
+
+.job-offer-sent .text-wrapper-78 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 400;
+  color: #8a7d73;
+  font-size: 10px;
+  letter-spacing: 0.12px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .bold-text-10 {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .text-wrapper-79 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #3f372f;
+  font-size: 11px;
+  text-align: right;
+  letter-spacing: 0.06px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .container-37 {
+  display: flex;
+  height: 47px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 0px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-color: #eadfd5;
+}
+
+.job-offer-sent .text-17 {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  align-self: stretch;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .bold-text-11 {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  position: relative;
+  align-self: stretch;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .text-wrapper-80 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #3f372f;
+  font-size: 11px;
+  text-align: right;
+  letter-spacing: 0.06px;
+  line-height: normal;
+}
+
+.job-offer-sent .container-38 {
+  display: flex;
+  height: 43px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 0px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-color: #eadfd5;
+}
+
+.job-offer-sent .bold-text-12 {
+  position: relative;
+  align-self: stretch;
+  width: 57.81px;
+  background-color: #fff3cd;
+  border-radius: 999px;
+}
+
+.job-offer-sent .text-wrapper-81 {
+  position: absolute;
+  top: 5px;
+  left: 8px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #8a7d73;
+  font-size: 10px;
+  text-align: right;
+  letter-spacing: 0.12px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .container-39 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 0px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .container-margin-17 {
+  align-items: flex-start;
+  padding: 18px 0px 0px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.job-offer-sent .container-40 {
+  display: grid;
+  grid-template-columns: 359px;
+  grid-template-rows: 48px 48px;
+  height: fit-content;
+  gap: 10px;
+}
+
+.job-offer-sent .button-44 {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  grid-row: 0 / 1;
+  grid-column: 0 / 1;
+  justify-self: start;
+  width: 359px;
+  min-height: 48px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0px 20px;
+  background-color: #d9784f;
+  border-radius: 13px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.job-offer-sent .text-wrapper-82 {
+  position: relative;
+  width: fit-content;
+  font-family: "Arial-Bold", Helvetica;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 13.3px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .navigation-5 {
+  position: absolute;
+  top: 756px;
+  left: 0;
+  width: 391px;
+  height: 64px;
+  background-color: #fffdf9fa;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-color: #eadfd5;
+}
+
+.job-offer-sent .button-45 {
+  display: inline-flex;
+  height: 34px;
+  gap: 3px;
+  padding: 1px 6px;
+  position: absolute;
+  top: 16px;
+  left: 29px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.job-offer-sent .text-wrapper-83 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Arial-Regular", Helvetica;
+  font-weight: 400;
+  color: #d9784f;
+  font-size: 15px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .text-wrapper-84 {
+  position: relative;
+  width: fit-content;
+  font-family: "Arial-Regular", Helvetica;
+  font-weight: 400;
+  color: #d9784f;
+  font-size: 9px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .button-46 {
+  display: inline-flex;
+  height: 34px;
+  gap: 3px;
+  padding: 1px 6px;
+  position: absolute;
+  top: 16px;
+  left: 135px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.job-offer-sent .text-wrapper-85 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Arial-Regular", Helvetica;
+  font-weight: 400;
+  color: #8a7d73;
+  font-size: 15px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .text-wrapper-86 {
+  position: relative;
+  width: fit-content;
+  font-family: "Arial-Regular", Helvetica;
+  font-weight: 400;
+  color: #8a7d73;
+  font-size: 9px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.job-offer-sent .button-47 {
+  display: inline-flex;
+  gap: 3px;
+  padding: 1px 6px;
+  position: absolute;
+  top: 16px;
+  left: 224px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.job-offer-sent .button-48 {
+  display: inline-flex;
+  height: 34px;
+  gap: 3px;
+  padding: 1px 6px;
+  position: absolute;
+  top: 16px;
+  left: 328px;
+  flex-direction: column;
+  align-items: center;
+}
