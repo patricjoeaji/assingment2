@@ -1,0 +1,80 @@
+
+    <!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../globals.css">
+<link rel="stylesheet" href="validation-error.css">
+<link rel="stylesheet" href="/bottom-nav.css">
+<script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="validation-error" data-model-id="16:682"><div class="section-3" ><header class="header-3" >
+    
+   <button
+  class="button-29"
+  onclick="window.location.href='create-job.html'"
+>
+  <div class="text-wrapper-40">‹</div>
+</button>
+
+<div class="bold-text-7" ><div class="text-wrapper-41" >Create Job</div></div></header>
+<div class="form-margin" ><div class="form" ><div class="container-23" ><div class="label" ><div class="text-wrapper-42" >Job title</div>
+<div class="text-input" ><div class="kitchen-installation" >Hedge Trimming</div></div></div>
+<div class="label-margin" ><div class="label-2" ><div class="text-wrapper-42" >Description</div>
+<div class="text-area" ></div></div></div>
+<div class="label-wrapper" ><div class="label-3" ><div class="text-wrapper-42" >Date</div>
+<div class="text-input-2" ><div class="text-wrapper-43" >Select date</div></div></div></div>
+<div class="container-margin-9" ><div class="container-24" ><div class="label-margin-2" ><div class="label-4" ><div class="text-wrapper-42" >Suburb</div>
+<div class="brisbane-wrapper" ><div class="text-wrapper-44" >The Gap</div></div></div></div>
+<div class="label-margin-3" ><div class="label-4" ><div class="text-wrapper-42" >Postcode</div>
+<div class="element-wrapper" ><div class="text-wrapper-44" >4061</div></div></div></div></div></div>
+<div class="label-5" ><div class="text-wrapper-42" >Street address</div>
+<div class="text-input-3" ><div class="text-wrapper-45" >12 Smith St</div></div></div>
+<div class="container-margin-10" ><div class="container-25" ><div class="label-margin-2" ><div class="label-6" ><div class="text-wrapper-42" >Start time</div>
+<div class="time-picker" ></div></div></div>
+<div class="label-margin-4" ><div class="label-7" ><div class="text-wrapper-42" >Working hours</div>
+<div class="time-picker-2" ></div></div></div></div></div></div>
+<button class="button-30" ><div class="text-wrapper-46" >Create job</div></button>
+<div class="paragraph-3" ><div class="text-wrapper-47" >Date is required</div></div></div></div>
+
+<button
+  class="button-31"
+  onclick="window.location.href='allocate-worker.html'"
+>
+  <div class="text-wrapper-48">Create Job</div>
+</button>
+
+<div class="container-26" ><div class="heading-4" ><div class="text-wrapper-49" >Client contact</div></div>
+<div class="label-margin-5" ><div class="label" ><div class="text-wrapper-42" >Client name</div>
+<div class="text-input-4" ><div class="text-wrapper-44" >Alex Johnson</div></div></div></div>
+<div class="label-margin-6" ><div class="label" ><div class="text-wrapper-42" >Client phone</div>
+<div class="text-input-4" ><div class="text-wrapper-44" >0412 345 678</div></div></div></div></div></div>
+<div class="frame-3" ><div class="div-wrapper-6" ><div class="text-wrapper-50" >9:41</div></div>
+<div class="div-wrapper-6" ><div class="text-wrapper-51" >●●● Wi‑Fi ▰</div></div></div>
+<div class="navigation-3" ><div class="button-32" ><div class="text-wrapper-52" >▣</div>
+<div class="text-wrapper-53" >Calendar</div></div>
+<div class="button-33" ><div class="text-wrapper-54" >▤</div>
+<div class="text-wrapper-55" >Jobs</div></div>
+<div class="button-34" ><div class="text-wrapper-54" >♙</div>
+<div class="text-wrapper-55" >Workers</div></div>
+<div class="button-35" ><div class="text-wrapper-54" >☰</div>
+<div class="text-wrapper-55" >Menu</div></div></div></div>
+<script>
+  let currentUser;
+  try {
+    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  } catch (e) {
+    currentUser = null;
+  }
+  if (!currentUser || currentUser.role !== 'Owner') {
+    if (currentUser && currentUser.role === 'Worker') {
+      window.location.href = '/worker-view/worker-view.html';
+    } else {
+      window.location.href = '/login/login.html';
+    }
+  }
+</script>
+</body>
+</html>

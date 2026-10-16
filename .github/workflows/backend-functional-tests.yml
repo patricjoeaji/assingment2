@@ -1,0 +1,70 @@
+name: Backend CI and EC2 CD
+
+on:
+  push:
+    branches: [main, test/fr12-payroll-actions]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    name: FR-09 to FR-12 backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Australia/Brisbane
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        id: install
+        run: npm ci
+      - name: FR-09 Worker Creation
+        if: ${{ !cancelled() && success() }}
+        run: node --test --test-reporter=spec tests/worker-creation.test.js
+      - name: FR-10 Worker Status
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: node --test --test-reporter=spec tests/worker-status.test.js
+      - name: FR-11 Account Management
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: node --test --test-reporter=spec tests/account-management.test.js
+      - name: FR-12 Timesheets and Payslips
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run test:payroll
+
+  deploy-ec2:
+    name: CD - Deploy to EC2
+    needs: backend-tests
+    if: >-
+      github.repository == 'Krisy-uni/assignment2-IFN636' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: [self-hosted, Linux, X64, jobflow-deploy]
+    timeout-minutes: 10
+    concurrency:
+      group: jobflow-ec2-deployment
+      cancel-in-progress: false
+    env:
+      APP_DIR: /home/ubuntu/assignment2-IFN636
+      APP_NAME: assignment2
+      PM2_HOME: /home/ubuntu/.pm2
+      HEALTH_URL: http://127.0.0.1:3000/login/login.html
+      DEPLOY_SHA: ${{ github.sha }}
+    steps:
+      - name: Check out tested commit in runner workspace
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Update application and restart PM2
+        shell: bash
+        run: bash scripts/deploy-ec2.sh

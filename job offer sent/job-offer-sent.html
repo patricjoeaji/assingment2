@@ -1,0 +1,188 @@
+
+    <!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../globals.css">
+<link rel="stylesheet" href="job-offer-sent.css">
+<link rel="stylesheet" href="/bottom-nav.css">
+<script src="/bottom-nav.js" defer></script>
+</head>
+<body>
+<div class="job-offer-sent" data-model-id="19:1635"><div class="container-margin-13" ><div class="container-31" ><div class="container-32" ><div class="div-wrapper-8" ><div class="text-wrapper-70" >9:41</div></div>
+<div class="div-wrapper-8" ><div class="text-wrapper-71" >●●● Wi-Fi ▰</div></div></div>
+<div class="section-5" ><header class="header-5" ><button class="button-43" ><div class="text-wrapper-72" >‹</div></button>
+<div class="bold-text-9" ><div class="text-wrapper-73" >Assign Worker</div></div></header>
+<div class="container-33" ><div class="container-margin-14" ><div class="container-34" ><div class="text-wrapper-74" >✓</div></div></div>
+<div class="heading-6" ><div class="text-wrapper-75" >Job offer sent!</div></div>
+<div class="paragraph-margin-2" >
+  
+ <p class="text-wrapper-76" id="offerMessage">Loading job offer...</p>
+
+</div>
+<div class="container-margin-15" ><div class="container-35" ><div class="heading-7" ><div class="text-wrapper-77" >Job Details</div></div>
+<div class="container-margin-16" ><div class="container-36" ><div class="div-wrapper-8" ><div class="text-wrapper-78" >Job</div></div>
+
+<div class="bold-text-10"><div class="text-wrapper-79" id="jobTitle">Loading...</div></div>
+
+</div></div>
+<div class="container-37" ><div class="text-17" ><div class="text-wrapper-78" >Schedule</div></div>
+
+<div class="bold-text-11"><p class="text-wrapper-80" id="jobSchedule">Loading...</p></div>
+
+</div>
+<div class="container-37" ><div class="text-17" ><div class="text-wrapper-78" >Location</div></div>
+
+<div class="bold-text-11"><p class="text-wrapper-80" id="jobLocation">Loading...</p></div>
+
+</div>
+<div class="container-38" ><div class="text-17" ><div class="text-wrapper-78" >Status</div></div>
+
+<div class="bold-text-12"><div class="text-wrapper-81" id="jobStatus">Pending</div></div>
+
+</div>
+<div class="container-39" ><div class="div-wrapper-8" ><div class="text-wrapper-78" >Offered to</div></div>
+
+<div class="bold-text-10"><div class="text-wrapper-79" id="offeredWorker">Loading...</div></div>
+
+</div></div></div>
+<div class="container-margin-17" ><div class="container-40" >
+    
+<button
+  class="button-44"
+  type="button"
+  onclick="viewJobDetails()"
+>
+  <div class="text-wrapper-82">View Job Details</div>
+</button>
+
+</div></div></div>
+<div class="navigation-5" ><div class="button-45" ><div class="text-wrapper-83" >▣</div>
+<div class="text-wrapper-84" >Calendar</div></div>
+<div class="button-46" ><div class="text-wrapper-85" >▤</div>
+<div class="text-wrapper-86" >Jobs</div></div>
+<div class="button-47" ><div class="text-wrapper-85" >♙</div>
+<div class="text-wrapper-86" >Workers</div></div>
+<div class="button-48" ><div class="text-wrapper-85" >☰</div>
+<div class="text-wrapper-86" >Menu</div></div></div></div></div></div></div>
+
+<script>
+  let currentUser;
+  try {
+    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  } catch (e) {
+    currentUser = null;
+  }
+  if (!currentUser || currentUser.role !== 'Owner') {
+    if (currentUser && currentUser.role === 'Worker') {
+      window.location.href = '/worker-view/worker-view.html';
+    } else {
+      window.location.href = '/login/login.html';
+    }
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return '';
+
+    const date = new Date(`${dateValue}T00:00:00`);
+
+    return date.toLocaleDateString('en-AU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  function formatTime(timeValue) {
+    if (!timeValue) return '';
+
+    const parts = timeValue.split(':');
+    const hour = Number(parts[0]);
+    const minute = Number(parts[1]);
+
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+
+    return date.toLocaleTimeString('en-AU', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  function getJobId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+  }
+
+  function viewJobDetails() {
+    const jobId = getJobId();
+
+    if (!jobId) {
+      alert('Job ID is missing.');
+      return;
+    }
+
+    window.location.href =
+      `/reallocate-worker/reallocate-worker.html?id=${encodeURIComponent(jobId)}`;
+  }
+
+  async function loadSentJob() {
+    const jobId = getJobId();
+
+    if (!jobId) {
+      document.getElementById('offerMessage').textContent =
+        'Job information could not be found.';
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/jobs/${encodeURIComponent(jobId)}`
+      );
+
+      const job = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          job.message || 'Unable to load job'
+        );
+      }
+
+      const workerName =
+        job.assignedWorker || 'Selected worker';
+
+      document.getElementById('offerMessage').textContent =
+        `Your job offer has been sent to ${workerName}.`;
+
+      document.getElementById('jobTitle').textContent =
+        job.title || 'Untitled Job';
+
+      document.getElementById('jobSchedule').textContent =
+        `${formatDate(job.date)}, ${formatTime(job.startTime)} – ${formatTime(job.endTime)}`;
+
+      document.getElementById('jobLocation').textContent =
+        job.location || '';
+
+      document.getElementById('jobStatus').textContent =
+        job.status || 'Pending';
+
+      document.getElementById('offeredWorker').textContent =
+        workerName;
+
+    } catch (error) {
+      console.error('Load sent job error:', error);
+
+      document.getElementById('offerMessage').textContent =
+        'Unable to load the job offer.';
+
+      document.getElementById('jobTitle').textContent =
+        'Job not found';
+    }
+  }
+
+  loadSentJob();
+</script>
+</body>
+</html>

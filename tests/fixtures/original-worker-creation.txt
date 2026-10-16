@@ -1,0 +1,67 @@
+// Baseline: main commit d9c2256f0533e1237687cf570804cd8d94754a00
+function toPublicUser(user) {
+  return {
+    id: String(user._id),
+    name: user.name,
+    phone: user.phone || '',
+    email: user.email,
+    role: user.role,
+    isActive: user.isActive !== false,
+    hourlyRate: user.hourlyRate ?? null
+  };
+}
+
+async function requireOwner(req, res, next) {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: 'Please sign in as an owner.' });
+  }
+
+  try {
+    const owner = await User.findById(req.session.userId);
+
+    if (!owner || owner.role !== 'Owner' || owner.isActive === false) {
+      return res.status(403).json({ message: 'Owner access is required.' });
+    }
+
+    req.owner = owner;
+    next();
+  } catch (error) {
+    res.status(500).json({ message: 'Unable to verify owner access.' });
+  }
+}
+
+app.post('/api/workers', requireOwner, async (req, res) => {
+  try {
+    const name = String(req.body.name || '').trim();
+    const phone = String(req.body.phone || '').trim();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const password = String(req.body.password || '');
+
+    if (!name || !email || !phone || password.length < 8) {
+      return res.status(400).json({
+        message: 'Name, email, phone, and a password of at least 8 characters are required.'
+      });
+    }
+
+    const worker = await User.create({
+      name,
+      phone,
+      email,
+      password: await bcrypt.hash(password, 10),
+      role: 'Worker',
+      isActive: true
+    });
+
+    res.status(201).json({
+      message: 'Worker added.',
+      worker: toPublicUser(worker)
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: 'That email is already in use.' });
+    }
+
+    res.status(400).json({ message: error.message });
+  }
+});
+
