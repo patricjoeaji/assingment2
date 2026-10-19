@@ -48,6 +48,8 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
   res.redirect('/login/login.html');
 });
+const jobUploadDirectory = path.join(__dirname, '.private-uploads', 'jobs');
+fs.mkdirSync(jobUploadDirectory, { recursive: true });
 
 
 const photoExtensions = {
