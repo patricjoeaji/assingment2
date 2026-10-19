@@ -4,10 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Add Worker | JobFlow</title>
-  <link rel="stylesheet" href="globals.css">
-  <link rel="stylesheet" href="owner-view/owner-view.css">
-  <link rel="stylesheet" href="workers.css">
-  <link rel="stylesheet" href="bottom-nav.css">
+  
+<link rel="stylesheet" href="/globals.css">
+<link rel="stylesheet" href="/owner-view/owner-view.css">
+<link rel="stylesheet" href="/workers/workers.css">
+<link rel="stylesheet" href="/bottom-nav.css">
+  
   <script src="/bottom-nav.js" defer></script>
 </head>
 <body>
@@ -19,7 +21,9 @@
 
   <main class="workers-page">
     <header class="page-header">
-      <a class="schedule-link" href="/workers.html">&larr; All Workers</a>
+      
+      <a class="schedule-link" href="/workers/workers.html">&larr; All Workers</a>
+      
       <a class="brand" href="/owner-view/owner-view.html" aria-label="JobFlow schedule">
         <span class="brand-mark">J</span>
         <span>JobFlow</span>
@@ -46,7 +50,7 @@
         <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
 
         <div class="form-actions">
-          <a class="secondary-button cancel-link" href="/workers.html">Cancel</a>
+          <a class="secondary-button cancel-link" href="/workers/workers.html">Cancel</a>
           <button class="primary-button" type="submit">Create Worker</button>
         </div>
       </form>
@@ -92,7 +96,7 @@
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Unable to add worker.');
 
-        window.location.href = `/workers.html?added=1&workerId=${encodeURIComponent(result.worker.id)}`;
+        window.location.href = `/workers/workers.html?added=1&workerId=${encodeURIComponent(result.worker.id)}`;
       } catch (error) {
         message.textContent = error.message;
       }
