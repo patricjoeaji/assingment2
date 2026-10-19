@@ -2,12 +2,17 @@
     <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../globals.css">
 <link rel="stylesheet" href="owner-view-empty.css">
 <link rel="stylesheet" href="/bottom-nav.css">
 <script src="/bottom-nav.js" defer></script>
+<style>
+.owner-view-empty .calendar-dot-finished { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: #8452cc; }
+</style>
+<link rel="stylesheet" href="/calendar-summary.css">
+<script src="/calendar-summary.js"></script>
 </head>
 <body>
 <div class="owner-view-empty" data-model-id="19:1305"><div class="frame" ><div class="section" ><header class="header" ><button class="button" ><div class="text-wrapper" >☰</div></button>
@@ -65,38 +70,7 @@
 <div class="text-9" ><div class="italic-text-3" ></div></div></button></div></div></div></div>
 
 <div class="container-margin-3">
-  <div class="container-5">
-
-    <div class="container-6">
-      <div class="text-13">
-        <div class="italic-text-4"></div>
-        <div class="text-wrapper-8">Pending</div>
-      </div>
-      <div class="text-wrapper-9" id="pendingCount">0</div>
-    </div>
-
-    <div class="container-7">
-      <div class="text-14">
-        <div class="italic-text-5"></div>
-        <div class="text-wrapper-8">Accepted</div>
-      </div>
-      <div class="text-wrapper-9" id="acceptedCount">0</div>
-    </div>
-
-    <div class="container-8">
-      <div class="text-15">
-        <div class="italic-text-6"></div>
-        <div class="text-wrapper-8">Declined</div>
-      </div>
-      <div class="text-wrapper-9" id="declinedCount">0</div>
-    </div>
-
-    <div class="container-9">
-      <div class="text-wrapper-10">Total jobs</div>
-      <div class="text-wrapper-9" id="totalCount">0</div>
-    </div>
-
-  </div>
+  <div id="calendarSummary"></div>
 </div>
 
 <div class="container-10">
@@ -116,7 +90,7 @@
 <div class="button-wrapper">
   <button
     class="button-18"
-    onclick="window.location.href='create-job.html'"
+    onclick="window.location.href='/create%20job/create-job.html'"
   >
     <div class="text-wrapper-16">+ Create Job</div>
   </button>
@@ -152,7 +126,7 @@
     }
   }
 
-  const calendarStart = '2026-09-01';
+  let calendarStart = formatDateKey(new Date());
   const calendarDaysCount = 14;
 
   let allJobs = [];
@@ -192,6 +166,8 @@
   function getDotClass(status) {
     const normalised = normaliseStatus(status);
 
+    if (normalised === 'finished') return 'calendar-dot-finished';
+
     if (normalised === 'accepted') {
       return 'italic-text-2';
     }
@@ -203,123 +179,38 @@
     return 'italic-text';
   }
 
-  function renderCalendar() {
-    const container =
-      document.getElementById('calendarDays');
-
-    container.innerHTML = '';
-
-    const startDate =
-      createDateFromKey(calendarStart);
-
-    for (
-      let index = 0;
-      index < calendarDaysCount;
-      index += 1
-    ) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + index);
-
-      const dateKey = formatDateKey(date);
-      const jobs = getJobsForDate(dateKey);
-      const isSelected = dateKey === selectedDate;
-
-      const button = document.createElement('button');
-      button.className = `button-${4 + index}`;
-      button.type = 'button';
-
-      const statuses = [
-        ...new Set(
-          jobs.map(job => normaliseStatus(job.status))
-        )
-      ];
-
-      const dots = statuses
-        .map(status => {
-          return `<div class="${getDotClass(status)}"></div>`;
-        })
-        .join('');
-
-      button.innerHTML = `
-        ${isSelected ? '<div class="ellipse"></div>' : ''}
-
-        <div class="div-wrapper-2">
-          <div class="${isSelected ? 'text-11' : 'text-8'}">
-            <div class="${isSelected ? 'text-wrapper-7' : 'text-wrapper-4'}">
-              ${date.getDate()}
-            </div>
-          </div>
-        </div>
-
-        <div class="text-9">
-          ${dots}
-        </div>
-      `;
-
-      button.addEventListener('click', () => {
-        if (jobs.length > 0) {
-          window.location.href =
-            `owner-view.html?date=${encodeURIComponent(dateKey)}`;
-          return;
-        }
-
-        selectedDate = dateKey;
-
-        window.history.replaceState(
-          {},
-          '',
-          `owner-view-empty.html?date=${encodeURIComponent(dateKey)}`
-        );
-
-        renderCalendar();
-        renderEmptyDate();
-      });
-
-      container.appendChild(button);
-    }
-  }
-
-  function renderStatistics() {
-    const endDate =
-      createDateFromKey(calendarStart);
-
-    endDate.setDate(
-      endDate.getDate() + calendarDaysCount - 1
-    );
-
-    const endKey = formatDateKey(endDate);
-
-    const rangeJobs = allJobs.filter(job => {
-      return (
-        job.date >= calendarStart &&
-        job.date <= endKey
-      );
+  function renderDateRange() {
+    const start = createDateFromKey(calendarStart);
+    const end = new Date(start);
+    end.setDate(end.getDate() + calendarDaysCount - 1);
+    document.getElementById('dateRange').textContent =
+      `${start.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} – ${end.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    document.querySelectorAll('.container-3 .text-wrapper-3').forEach((label, index) => {
+      const date = new Date(start);
+      date.setDate(date.getDate() + index);
+      label.textContent = date.toLocaleDateString('en-AU', { weekday: 'short' }).toUpperCase();
     });
-
-    const pending = rangeJobs.filter(job => {
-      return normaliseStatus(job.status) === 'pending';
-    }).length;
-
-    const accepted = rangeJobs.filter(job => {
-      return normaliseStatus(job.status) === 'accepted';
-    }).length;
-
-    const declined = rangeJobs.filter(job => {
-      return normaliseStatus(job.status) === 'declined';
-    }).length;
-
-    document.getElementById('pendingCount').textContent =
-      pending;
-
-    document.getElementById('acceptedCount').textContent =
-      accepted;
-
-    document.getElementById('declinedCount').textContent =
-      declined;
-
-    document.getElementById('totalCount').textContent =
-      rangeJobs.length;
   }
+
+  function changeCalendarRange(offset) {
+    const start = createDateFromKey(calendarStart);
+    start.setDate(start.getDate() + offset);
+    window.location.href = `/owner-view/owner-view.html?date=${formatDateKey(start)}`;
+  }
+
+  function renderCalendar() {
+    JobCalendar.render({ start: calendarStart, selected: selectedDate, jobs: allJobs, onSelect(dateKey, entries) {
+      if (entries.length > 0) {
+        window.location.href = `/owner-view/owner-view.html?date=${dateKey}&start=${calendarStart}`;
+        return;
+      }
+        selectedDate = dateKey;
+        window.history.replaceState({}, '', `/owner-view-empty/owner-view-empty.html?date=${dateKey}&start=${calendarStart}`);
+        renderCalendar(); renderEmptyDate();
+    } });
+  }
+
+  function renderStatistics() { /* Rendered together by JobCalendar. */ }
 
   function renderEmptyDate() {
     document.getElementById(
@@ -348,16 +239,19 @@
         new URLSearchParams(window.location.search);
 
       selectedDate =
-        params.get('date') || '2026-09-04';
+        params.get('date') || formatDateKey(new Date());
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate) || Number.isNaN(createDateFromKey(selectedDate).getTime())) {
+        selectedDate = formatDateKey(new Date());
+      }
+      calendarStart = params.get('start') || selectedDate;
 
       if (getJobsForDate(selectedDate).length > 0) {
         window.location.href =
-          `owner-view.html?date=${encodeURIComponent(selectedDate)}`;
+          `/owner-view/owner-view.html?date=${encodeURIComponent(selectedDate)}&start=${calendarStart}`;
         return;
       }
 
-      document.getElementById('dateRange').textContent =
-        '1 Sep – 14 Sep, 2026';
+      renderDateRange();
 
       renderCalendar();
       renderStatistics();
@@ -372,6 +266,8 @@
     }
   }
 
+  document.querySelector('.button-2').addEventListener('click', () => changeCalendarRange(-calendarDaysCount));
+  document.querySelector('.button-3').addEventListener('click', () => changeCalendarRange(calendarDaysCount));
   loadEmptyCalendar();
 </script>
 </body>

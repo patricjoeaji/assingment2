@@ -2,12 +2,14 @@
     <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <meta charset="utf-8" />
   <link rel="stylesheet" href="../globals.css">
 <link rel="stylesheet" href="worker-view.css">
 <link rel="stylesheet" href="/bottom-nav.css">
 <script src="/bottom-nav.js" defer></script>
+<link rel="stylesheet" href="/calendar-summary.css">
+<script src="/calendar-summary.js"></script>
 </head>
 <body>
 <div class="worker-view" data-model-id="13:661"><div class="div" ><div class="container" ><div class="div-wrapper" ><div class="text-wrapper" >9:41</div></div>
@@ -65,46 +67,7 @@
 <div class="text-11" ><div class="italic-text-2" ></div></div></button></div></div></div></div>
 
 <div class="container-margin" id="summaryCardRow">
-  <div class="container-6">
-
-    <div class="container-7" data-status-filter="pending" role="button" tabindex="0" title="Filter Pending jobs">
-      <div class="text-13">
-        <div class="italic-text-4"></div>
-        <div class="text-wrapper-11">Pending</div>
-      </div>
-      <div class="text-wrapper-12" id="pendingCount">0</div>
-    </div>
-
-    <div class="container-8" data-status-filter="accepted" role="button" tabindex="0" title="Filter Accepted jobs">
-      <div class="text-14">
-        <div class="italic-text-5"></div>
-        <div class="text-wrapper-11">Accepted</div>
-      </div>
-      <div class="text-wrapper-12" id="acceptedCount">0</div>
-    </div>
-
-    <div class="container-9" data-status-filter="declined" role="button" tabindex="0" title="Filter Declined jobs">
-      <div class="text-15">
-        <div class="italic-text-6"></div>
-        <div class="text-wrapper-11">Declined</div>
-      </div>
-      <div class="text-wrapper-12" id="declinedCount">0</div>
-    </div>
-
-    <div class="container-finished" data-status-filter="finished" role="button" tabindex="0" title="Filter Finished jobs">
-      <div class="text-finished">
-        <div class="finished-stat-dot"></div>
-        <div class="text-wrapper-11">Finished</div>
-      </div>
-      <div class="text-wrapper-12" id="finishedCount">0</div>
-    </div>
-
-    <div class="container-10" data-status-filter="all" role="button" tabindex="0" title="Filter All jobs">
-      <div class="text-wrapper-13">Total jobs</div>
-      <div class="text-wrapper-12" id="totalCount">0</div>
-    </div>
-
-  </div>
+  <div id="calendarSummary"></div>
 </div>
 
 
@@ -333,100 +296,17 @@
   }
 
   function renderCalendar() {
-    const container =
-      document.getElementById('calendarDays');
-
-    container.innerHTML = '';
-
-    const startDate =
-      createDateFromKey(calendarStart);
-
-    for (
-      let index = 0;
-      index < calendarDaysCount;
-      index += 1
-    ) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + index);
-
-      const dateKey = formatDateKey(date);
-      const jobs = getJobsForDate(dateKey);
-      const isSelected = dateKey === selectedDate;
-
-      const button = document.createElement('button');
-
-      button.className = `button-${5 + index}`;
-      button.type = 'button';
-
-      const dots = jobs
-        .map(job => {
-          return `<div class="${getDotClass(job.status)}" aria-hidden="true"></div>`;
-        })
-        .join('');
-
-      button.innerHTML = `
-        <div class="text-margin">
-          <div class="${isSelected ? 'text-12' : 'text-8'}">
-            <div class="${isSelected ? 'text-wrapper-9' : 'text-wrapper-7'}">
-              ${date.getDate()}
-            </div>
-          </div>
-        </div>
-
-        <div class="text-11">
-          ${dots}
-        </div>
-      `;
-
-      button.addEventListener('click', () => {
+    JobCalendar.render({ start: calendarStart, selected: selectedDate, jobs: workerJobs,
+      summaryAll: activeTab === 'jobs', interactive: true,
+      onSelect(dateKey) {
         selectedDate = dateKey;
-
-        window.history.replaceState(
-          {},
-          '',
-          `worker-view.html?date=${encodeURIComponent(dateKey)}`
-        );
-
-        renderCalendar();
-        renderSelectedJobs();
-      });
-
-      container.appendChild(button);
-    }
+        window.history.replaceState({}, '', `/worker-view/worker-view.html?date=${dateKey}&start=${calendarStart}${window.location.hash}`);
+        renderCalendar(); renderSelectedJobs();
+      }
+    });
   }
 
-  function renderStatistics() {
-    const pending = workerJobs.filter(job => {
-      return normaliseStatus(job.status) === 'pending';
-    }).length;
-
-    const accepted = workerJobs.filter(job => {
-      return normaliseStatus(job.status) === 'accepted';
-    }).length;
-
-    const declined = workerJobs.filter(job => {
-      return normaliseStatus(job.status) === 'declined';
-    }).length;
-
-    const finished = workerJobs.filter(job => {
-      return normaliseStatus(job.status) === 'finished';
-    }).length;
-
-    document.getElementById('pendingCount').textContent =
-      pending;
-
-    document.getElementById('acceptedCount').textContent =
-      accepted;
-
-    document.getElementById('declinedCount').textContent =
-      declined;
-
-    document.getElementById('finishedCount').textContent =
-      finished;
-
-    document.getElementById('totalCount').textContent =
-      workerJobs.length;
-  }
+  function renderStatistics() { renderCalendar(); }
 
   let activeTab = (window.location.hash === '#jobs' || window.location.hash === '#jobList') ? 'jobs' : 'calendar';
   let selectedStatusFilter = 'all';
@@ -451,9 +331,9 @@
   }
 
   function renderView() {
-    renderStatistics();
     const isJobsTab = (window.location.hash === '#jobs' || window.location.hash === '#jobList');
     activeTab = isJobsTab ? 'jobs' : 'calendar';
+    renderStatistics();
 
     const viewTitle = document.getElementById('viewTitle');
     const calendarRangeRow = document.getElementById('calendarRangeRow');
@@ -706,12 +586,13 @@ async function updateJobStatus(jobId, newStatus) {
         new URLSearchParams(window.location.search);
 
       selectedDate = params.get('date');
+      const requestedStart = params.get('start') || selectedDate;
+      if (requestedStart && /^\d{4}-\d{2}-\d{2}$/.test(requestedStart) && !Number.isNaN(createDateFromKey(requestedStart).getTime())) calendarStart = requestedStart;
 
       if (
         !selectedDate ||
         selectedDate < calendarStart ||
-        selectedDate > getCalendarEndKey() ||
-        getJobsForDate(selectedDate).length === 0
+        selectedDate > getCalendarEndKey()
       ) {
         const firstDateWithJobs = workerJobs.find(job => {
           return job.date >= calendarStart && job.date <= getCalendarEndKey();
@@ -743,18 +624,18 @@ async function updateJobStatus(jobId, newStatus) {
     changeCalendarRange(calendarDaysCount);
   });
 
-  // Wire up stat block clicks for summary filtering
-  document.querySelectorAll('[data-status-filter]').forEach(el => {
-    el.addEventListener('click', () => {
-      const filter = el.dataset.statusFilter;
-      selectedStatusFilter = filter;
-      if (window.location.hash !== '#jobs') {
-        window.location.hash = '#jobs';
-      } else {
-        renderView();
-      }
-    });
-  });
+  // Delegate because the shared renderer recreates summary cells.
+  function selectSummaryFilter(event) {
+    if (event.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
+    const cell = event.target.closest('[data-status-filter]');
+    if (!cell) return;
+    if (event.type === 'keydown') event.preventDefault();
+    selectedStatusFilter = cell.dataset.statusFilter;
+    if (window.location.hash !== '#jobs') window.location.hash = '#jobs';
+    else renderView();
+  }
+  document.getElementById('calendarSummary').addEventListener('click', selectSummaryFilter);
+  document.getElementById('calendarSummary').addEventListener('keydown', selectSummaryFilter);
 
   window.addEventListener('hashchange', renderView);
 

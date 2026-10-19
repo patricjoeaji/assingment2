@@ -1,0 +1,18 @@
+/* Shared calendar cells and summary; independent of exported page class names. */
+:is(.owner-view, .owner-view-empty, .worker-view) #calendarDays.job-calendar-days { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); grid-template-rows:repeat(2,47px); gap:3px; width:100%; }
+.job-calendar-day { all:unset; box-sizing:border-box; cursor:pointer; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+.job-calendar-number { display:flex; align-items:center; justify-content:center; width:27px; height:27px; flex:0 0 27px; border-radius:50%; font:700 12px Inter,Helvetica,Arial,sans-serif; color:#000; }
+.job-calendar-day[aria-pressed="true"] .job-calendar-number { background:#dc7950; color:white; }
+.job-calendar-dots { display:flex; flex-wrap:wrap; justify-content:center; gap:3px; min-height:7px; width:100%; }
+.job-status-dot { display:inline-block; width:7px; height:7px; flex:0 0 7px; border-radius:50%; background:#e5a012; }
+.job-status-accepted { background:#299357; } .job-status-declined { background:#ed4245; } .job-status-finished { background:#8054c7; }
+#calendarSummary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:58px 36px; width:100%; height:96px; box-sizing:border-box; border:1px solid #eadfd5; border-radius:13px; overflow:hidden; background:#fffdf9; font-family:Inter,Helvetica,Arial,sans-serif; }
+.job-summary-cell { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; min-width:0; border-right:1px solid #eadfd5; }
+.job-summary-cell:nth-child(4) { border-right:0; }
+.job-summary-label { display:flex; align-items:center; gap:4px; font-size:8px; color:#928479; }
+.job-summary-cell strong { font-size:20px; line-height:24px; color:#403a34; }
+.job-summary-total { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding:0 12px; background:#dc7950; color:white; font-size:8px; font-weight:700; }
+.job-summary-total strong { font-size:20px; }
+
+#calendarSummary [data-status-filter] { cursor:pointer; }
+#calendarSummary .is-selected { box-shadow:inset 0 0 0 2px #dc7950; }

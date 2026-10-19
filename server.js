@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config();
 const Job = require('./models/job');
 const User = require('./models/User');
+const Payslip = require('./models/Payslip');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
@@ -20,9 +21,12 @@ const {
 } = require('./payroll/payroll-calculations');
 const { isClockInPastGracePeriod } = require('./worker-time-rules');
 const session = require('express-session');
-const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const WorkerCreationService = require('./services/WorkerCreationService');
+const createWorkerHandler = require('./routes/createWorkerHandler');
+
+const workerCreation = new WorkerCreationService();
 
 const app = express();
 app.set('trust proxy', 1);
@@ -47,8 +51,6 @@ app.get('/', (req, res) => {
 const jobUploadDirectory = path.join(__dirname, '.private-uploads', 'jobs');
 fs.mkdirSync(jobUploadDirectory, { recursive: true });
 
-const payslipsDirectory = path.join(__dirname, '.private-uploads', 'payslips');
-fs.mkdirSync(payslipsDirectory, { recursive: true });
 
 const photoExtensions = {
   'image/jpeg': '.jpg',
@@ -57,22 +59,95 @@ const photoExtensions = {
 };
 
 const completionPhotoUpload = multer({
-  storage: multer.diskStorage({
-    destination: jobUploadDirectory,
-    filename: (req, file, callback) => {
-      callback(null, `${crypto.randomUUID()}${photoExtensions[file.mimetype] || ''}`);
-    }
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 10
+  },
   fileFilter: (req, file, callback) => {
+    const allowed = Boolean(photoExtensions[file.mimetype]);
+
     callback(
-      photoExtensions[file.mimetype]
+      allowed
         ? null
         : new Error('Only JPG, PNG, and WebP photos are supported.'),
-      Boolean(photoExtensions[file.mimetype])
+      allowed
     );
   }
 });
+
+function getPhotoBucket() {
+  if (mongoose.connection.readyState !== 1) {
+    throw new Error('Database is not connected. Please try again.');
+  }
+
+  return new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+    bucketName: 'completionPhotos'
+  });
+}
+
+async function removeStoredPhotos(ids) {
+  if (!ids.length) return;
+
+  try {
+    const bucket = getPhotoBucket();
+    const results = await Promise.allSettled(
+      ids.map(id => bucket.delete(id))
+    );
+
+    results.forEach(result => {
+      if (result.status === 'rejected') {
+        console.error('Photo cleanup failed:', result.reason);
+      }
+    });
+  } catch (error) {
+    console.error('Photo cleanup failed:', error);
+  }
+}
+
+async function saveCompletionPhotos(files, jobId) {
+  const bucket = getPhotoBucket();
+  const filenames = [];
+  const uploadedIds = [];
+
+  try {
+    for (const file of files) {
+      const filename =
+        `${crypto.randomUUID()}${photoExtensions[file.mimetype]}`;
+
+      const upload = bucket.openUploadStream(filename, {
+        metadata: {
+          jobId: String(jobId),
+          contentType: file.mimetype
+        }
+      });
+
+      try {
+        await new Promise((resolve, reject) => {
+          upload.once('finish', resolve);
+          upload.once('error', reject);
+          upload.end(file.buffer);
+        });
+      } catch (error) {
+        try {
+          await upload.abort();
+        } catch (cleanupError) {
+          console.error('Incomplete upload cleanup failed:', cleanupError);
+        }
+
+        throw error;
+      }
+
+      uploadedIds.push(upload.id);
+      filenames.push(filename);
+    }
+
+    return { filenames, uploadedIds };
+  } catch (error) {
+    await removeStoredPhotos(uploadedIds);
+    throw error;
+  }
+}
 
 function parseCompletionPhotos(req, res, next) {
   completionPhotoUpload.array('photos')(req, res, error => {
@@ -540,40 +615,7 @@ app.get('/api/workers', requireOwner, async (req, res) => {
   }
 });
 
-app.post('/api/workers', requireOwner, async (req, res) => {
-  try {
-    const name = String(req.body.name || '').trim();
-    const phone = String(req.body.phone || '').trim();
-    const email = String(req.body.email || '').trim().toLowerCase();
-    const password = String(req.body.password || '');
-
-    if (!name || !email || !phone || password.length < 8) {
-      return res.status(400).json({
-        message: 'Name, email, phone, and a password of at least 8 characters are required.'
-      });
-    }
-
-    const worker = await User.create({
-      name,
-      phone,
-      email,
-      password: await bcrypt.hash(password, 10),
-      role: 'Worker',
-      isActive: true
-    });
-
-    res.status(201).json({
-      message: 'Worker added.',
-      worker: toPublicUser(worker)
-    });
-  } catch (error) {
-    if (error.code === 11000) {
-      return res.status(409).json({ message: 'That email is already in use.' });
-    }
-
-    res.status(400).json({ message: error.message });
-  }
-});
+app.post('/api/workers', requireOwner, createWorkerHandler(workerCreation, toPublicUser));
 
 app.patch('/api/workers/:id/status', requireOwner, async (req, res) => {
   try {
@@ -693,7 +735,11 @@ app.post('/api/jobs/:id/clock-out', requireWorker, async (req, res) => {
   }
 });
 
+
 app.post('/api/jobs/:id/completion', requireWorker, parseCompletionPhotos, async (req, res) => {
+  let uploadedIds = [];
+  let jobSaved = false;
+
   try {
     const job = await Job.findById(req.params.id);
 
@@ -705,32 +751,78 @@ app.post('/api/jobs/:id/completion', requireWorker, parseCompletionPhotos, async
       job.assignedWorker !== req.worker.name ||
       String(job.status).toLowerCase() !== 'accepted'
     ) {
-      return res.status(403).json({ message: 'This job is not assigned to you.' });
+      return res.status(403).json({
+        message: 'This job is not assigned to you.'
+      });
     }
 
     if (job.completionSubmittedAt) {
-      return res.status(409).json({ message: 'This job has already been submitted.' });
+      return res.status(409).json({
+        message: 'This job has already been submitted.'
+      });
     }
 
-    job.completionNote = String(req.body.note || '').trim();
-    job.completionPhotos = (req.files || []).map(file => file.filename);
-    job.completionSubmittedAt = new Date();
-    job.status = 'Finished';
-    job.hoursApprovalStatus = 'Pending';
-    job.hoursApprovedAt = null;
-    job.hoursApprovedBy = null;
-    job.approvedClockInSource = null;
-    job.approvedClockOutSource = null;
-    job.approvedClockInAt = null;
-    job.approvedClockOutAt = null;
-    job.approvedHourlyRate = null;
-    await job.save();
+    const photos = await saveCompletionPhotos(
+      req.files || [],
+      job._id
+    );
 
-    res.json({ message: 'Completed job submitted for approval.', job });
+    uploadedIds = photos.uploadedIds;
+
+    const savedJob = await Job.findOneAndUpdate(
+      {
+        _id: job._id,
+        assignedWorker: req.worker.name,
+        status: job.status,
+        completionSubmittedAt: null
+      },
+      {
+        $set: {
+          completionNote: String(req.body.note || '').trim(),
+          completionPhotos: photos.filenames,
+          completionSubmittedAt: new Date(),
+          status: 'Finished',
+          hoursApprovalStatus: 'Pending',
+          hoursApprovedAt: null,
+          hoursApprovedBy: null,
+          approvedClockInSource: null,
+          approvedClockOutSource: null,
+          approvedClockInAt: null,
+          approvedClockOutAt: null,
+          approvedHourlyRate: null
+        }
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!savedJob) {
+      await removeStoredPhotos(uploadedIds);
+      uploadedIds = [];
+
+      return res.status(409).json({
+        message: 'This job has changed or was already submitted. Please refresh.'
+      });
+    }
+
+    jobSaved = true;
+
+    res.json({
+      message: 'Completed job submitted for approval.',
+      job: savedJob
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    if (!jobSaved) {
+      await removeStoredPhotos(uploadedIds);
+    }
+
+    console.error('Completion submission failed:', error);
+
+    res.status(500).json({
+      message: 'Unable to submit completed job. Please try again.'
+    });
   }
 });
+
 
 app.get('/api/timesheets', requireOwner, async (req, res) => {
   try {
@@ -784,6 +876,40 @@ app.get('/api/worker/payslip', requireWorker, async (req, res) => {
       return res.status(400).json({ message: 'A valid weekStart date is required.' });
     }
 
+    const released = await Payslip.findOne({
+  workerId: req.worker._id,
+  weekStart: week.start
+}).lean();
+
+if (released) {
+  const data = released.snapshot;
+
+  return res.json({
+    worker: data.worker,
+    weekStart: released.weekStart,
+    weekEnd: released.weekEnd,
+    yearStart: data.yearStart,
+    days: data.days,
+    isSent: true,
+    current: {
+      minutes: data.current.minutes,
+      gross: data.current.gross,
+      superAmount: data.current.superAmount,
+      tax: data.current.tax,
+      net: data.current.netPay,
+      hourlyRate: data.current.rate
+    },
+    ytd: {
+      minutes: data.ytd.minutes,
+      gross: data.ytd.gross,
+      superAmount: data.ytd.superAmount,
+      tax: data.ytd.tax,
+      net: data.ytd.netPay,
+      hourlyRate: data.ytd.rate
+    }
+  });
+}
+    
     const workerName = req.worker.name;
     const yearStart = getAustralianFinancialYearStart(week.end);
 
@@ -860,7 +986,7 @@ app.get('/api/worker/payslip', requireWorker, async (req, res) => {
       weekEnd: week.end,
       yearStart,
       days,
-      isSent: currentJobs.length > 0 && currentJobs.every(j => Boolean(j.payslipSentAt)),
+     isSent: false,
       current: {
         minutes: currentMinutes,
         gross: currentGross,
@@ -886,112 +1012,52 @@ app.get('/api/worker/payslip', requireWorker, async (req, res) => {
 app.get('/api/worker/payslip/download', requireWorker, async (req, res) => {
   try {
     const week = getWeekRange(req.query.weekStart);
+
     if (!week) {
-      return res.status(400).json({ message: 'A valid weekStart date is required.' });
-    }
-
-    const workerName = req.worker.name;
-    const workerSlug = workerName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    const pdfFilename = `payslip-${workerSlug}-${week.start}.pdf`;
-    const pdfPath = path.join(payslipsDirectory, pdfFilename);
-
-    if (fs.existsSync(pdfPath)) {
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="${pdfFilename}"`);
-      return res.sendFile(pdfPath);
-    }
-
-    // Generate on the fly if not yet on disk
-    const yearStart = getAustralianFinancialYearStart(week.end);
-    const currentJobs = await Job.find({
-      date: { $gte: week.start, $lte: week.end },
-      assignedWorker: workerName,
-      hoursApprovalStatus: 'Approved'
-    }).sort({ date: 1, startTime: 1 });
-
-    const priorJobs = await Job.find({
-      date: { $gte: yearStart, $lt: week.start },
-      assignedWorker: workerName,
-      hoursApprovalStatus: 'Approved'
-    }).sort({ date: 1, startTime: 1 });
-
-    const workersByName = new Map([[workerName, req.worker]]);
-    const priorYtdList = aggregateYtdPayroll(priorJobs, workersByName);
-    const priorYtd = priorYtdList.length ? priorYtdList[0] : {
-      minutes: 0,
-      gross: 0,
-      superAmount: 0,
-      tax: 0,
-      net: 0,
-      missingRate: false
-    };
-
-    let currentMinutes = 0;
-    const lines = [];
-    currentJobs.forEach(job => {
-      const minutes = getApprovedJobMinutes(job) || 0;
-      currentMinutes += minutes;
-      const rate = job.approvedHourlyRate ?? req.worker.hourlyRate ?? 0;
-      const amount = roundMoney((minutes / 60) * rate);
-      lines.push({
-        title: job.title || 'Job',
-        date: job.date,
-        minutes,
-        rate,
-        amount
+      return res.status(400).json({
+        message: 'A valid weekStart date is required.'
       });
-    });
+    }
 
-    const gross = lines.reduce((total, job) => total + job.amount, 0);
-    const currentTax = calculateWeeklyTax(gross, yearStart);
-    const currentSuper = roundMoney(gross * 0.12);
-    const currentRate = currentMinutes > 0 ? roundMoney(gross / (currentMinutes / 60)) : Number(req.worker.hourlyRate || 0);
+    const released = await Payslip.findOne({
+      workerId: req.worker._id,
+      weekStart: week.start
+    }).lean();
 
-    const ytd = {
-      minutes: priorYtd.minutes + currentMinutes,
-      rate: priorYtd.minutes + currentMinutes > 0
-        ? roundMoney(((priorYtd.gross || 0) + gross) / ((priorYtd.minutes + currentMinutes) / 60))
-        : currentRate,
-      gross: roundMoney((priorYtd.gross || 0) + gross),
-      superAmount: roundMoney((priorYtd.superAmount || 0) + currentSuper),
-      tax: roundMoney((priorYtd.tax || 0) + currentTax),
-      netPay: roundMoney(((priorYtd.gross || 0) - (priorYtd.tax || 0)) + gross - currentTax)
-    };
+    if (!released) {
+      return res.status(404).json({
+        message: 'This payslip has not been released yet.'
+      });
+    }
 
-    const payslip = {
-      worker: req.worker,
-      week,
-      jobs: lines,
-      minutes: currentMinutes,
-      rate: currentRate,
-      gross,
-      superAmount: currentSuper,
-      tax: currentTax,
-      netPay: roundMoney(gross - currentTax),
-      current: {
-        minutes: currentMinutes,
-        rate: currentRate,
-        superAmount: currentSuper,
-        gross,
-        tax: currentTax,
-        netPay: roundMoney(gross - currentTax)
-      },
-      ytd
-    };
+    const pdfBuffer = await createPayslipPdfBuffer(
+      released.snapshot
+    );
 
-    const pdfBuffer = await createPayslipPdfBuffer(payslip);
-    try {
-      fs.writeFileSync(pdfPath, pdfBuffer);
-    } catch (e) {}
+    const workerSlug = released.snapshot.worker.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'worker';
+
+    const filename =
+      `payslip-${workerSlug}-${released.weekStart}.pdf`;
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${pdfFilename}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${filename}"`
+    );
+    res.setHeader('Cache-Control', 'private, no-store');
+
     res.send(pdfBuffer);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Payslip download failed:', error);
+
+    res.status(500).json({
+      message: 'Unable to download payslip.'
+    });
   }
 });
-
 app.get('/api/payroll/ytd', requireOwner, async (req, res) => {
   try {
     const through = String(req.query.through || '');
@@ -1115,7 +1181,9 @@ app.post('/api/payroll/send-payslips', requireOwner, async (req, res) => {
         gross: roundMoney(prior.gross + gross),
         superAmount: roundMoney(prior.superAmount + currentSuper),
         tax: roundMoney(prior.tax + currentTax),
-        netPay: roundMoney(prior.netPay ?? (prior.gross - prior.tax) + gross - currentTax)
+      netPay: roundMoney(
+  (prior.netPay ?? (prior.gross - prior.tax)) + gross - currentTax
+)
       };
       const payslip = {
         worker: entry.worker,
@@ -1137,21 +1205,78 @@ app.post('/api/payroll/send-payslips', requireOwner, async (req, res) => {
         },
         ytd
       };
-      payslip.pdf = await createPayslipPdfBuffer(payslip);
+      
       return payslip;
     }));
 
-    // Save generated PDF files to payslipsDirectory
-    for (const payslip of payslips) {
-      const workerSlug = (payslip.worker?.name || 'worker').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      const pdfPath = path.join(payslipsDirectory, `payslip-${workerSlug}-${week.start}.pdf`);
-      try {
-        fs.writeFileSync(pdfPath, payslip.pdf);
-      } catch (e) {
-        console.error('Failed to write payslip PDF to disk:', e);
-      }
+    // Save the released payslip details in MongoDB.
+await Payslip.init();
+
+const sentAt = new Date();
+
+for (const payslip of payslips) {
+  const days = Array(7).fill(0);
+
+  for (const job of payslip.jobs) {
+    const day = new Date(`${job.date}T00:00:00.000Z`);
+    const index = (day.getUTCDay() + 6) % 7;
+    days[index] += job.minutes;
+  }
+
+  const snapshot = {
+    worker: {
+      name: payslip.worker.name,
+      email: payslip.worker.email,
+      hourlyRate: payslip.worker.hourlyRate
+    },
+    week: payslip.week,
+    yearStart,
+    days,
+    jobs: payslip.jobs,
+    minutes: payslip.minutes,
+    rate: payslip.rate,
+    gross: payslip.gross,
+    superAmount: payslip.superAmount,
+    tax: payslip.tax,
+    netPay: payslip.netPay,
+    current: payslip.current,
+    ytd: payslip.ytd
+  };
+
+  try {
+    await Payslip.updateOne(
+      {
+        workerId: payslip.worker._id,
+        weekStart: week.start
+      },
+      {
+        $setOnInsert: {
+          workerId: payslip.worker._id,
+          weekStart: week.start,
+          weekEnd: week.end,
+          sentAt,
+          sentBy: req.owner._id,
+          snapshot
+        }
+      },
+      { upsert: true, runValidators: true }
+    );
+  } catch (error) {
+    // A concurrent push may already have saved this payslip.
+    if (error.code !== 11000) {
+      throw error;
     }
 
+    const existing = await Payslip.exists({
+      workerId: payslip.worker._id,
+      weekStart: week.start
+    });
+
+    if (!existing) {
+      throw error;
+    }
+  }
+}
     // Mark all jobs in this week as payslipSentAt
     const now = new Date();
     await Job.updateMany(
@@ -1354,18 +1479,63 @@ app.get('/api/jobs/:id/completed-details', requireCompletedJobAccess, async (req
   }
 });
 
+
 app.get('/api/completed-jobs/:id/photos/:filename', requireCompletedJobAccess, async (req, res) => {
   try {
     const filename = path.basename(req.params.filename);
     const job = req.completedJob;
 
     if (!job || !job.completionPhotos.includes(filename)) {
-      return res.status(404).json({ message: 'Photo not found.' });
+      return res.status(404).json({
+        message: 'Photo not found.'
+      });
     }
 
-    res.sendFile(path.join(jobUploadDirectory, filename));
+    const bucket = getPhotoBucket();
+
+    const files = await bucket.find({
+      filename,
+      'metadata.jobId': String(job._id)
+    }).limit(1).toArray();
+
+    if (!files.length) {
+      return res.status(404).json({
+        message: 'Photo file is missing.'
+      });
+    }
+
+    const photo = files[0];
+
+    res.setHeader(
+      'Content-Type',
+      photo.metadata?.contentType || 'application/octet-stream'
+    );
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
+    const download = bucket.openDownloadStream(photo._id);
+
+    download.on('error', error => {
+      console.error('Photo download failed:', error);
+
+      if (!res.headersSent) {
+        res.removeHeader('Content-Type');
+        res.status(500).json({
+          message: 'Unable to load photo.'
+        });
+      } else {
+        res.destroy();
+      }
+    });
+
+    res.on('close', () => download.destroy());
+    download.pipe(res);
   } catch (error) {
-    res.status(404).json({ message: 'Photo not found.' });
+    console.error('Photo request failed:', error);
+
+    res.status(500).json({
+      message: 'Unable to load photo.'
+    });
   }
 });
 

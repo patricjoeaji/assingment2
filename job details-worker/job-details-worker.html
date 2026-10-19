@@ -562,11 +562,11 @@ async function handleClockOut() {
     completionError.textContent = '';
     updateCompletionPhotoInput();
     renderCompletionPhotoPreview();
-    requestAnimationFrame(positionCompletionSubmitButton);
+    //requestAnimationFrame(positionCompletionSubmitButton);
   });
 
   completionNote.addEventListener('input', () => {
-    requestAnimationFrame(positionCompletionSubmitButton);
+    //requestAnimationFrame(positionCompletionSubmitButton);
   });
 
   async function submitCompletedJob() {

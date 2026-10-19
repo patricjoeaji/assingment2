@@ -4,6 +4,7 @@
   "description": "A mobile-first web application designed to support job scheduling, allocation and worker management for small trade businesses.",
   "main": "index.js",
   "scripts": {
+    "test:worker-creation": "node --test tests/worker-creation.test.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

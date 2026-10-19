@@ -1189,3 +1189,6 @@
   cursor: wait;
   opacity: 0.6;
 }
+#jobDetailsScrollSpacer {
+  pointer-events: none;
+}

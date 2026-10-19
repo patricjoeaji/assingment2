@@ -793,3 +793,16 @@
   line-height: normal;
   white-space: nowrap;
 }
+
+/* Keep additional active Workers reachable within the existing card. */
+.allocate-worker .container-56 {
+  max-height: 248px;
+  overflow-y: auto;
+  grid-template-rows: none;
+  grid-auto-rows: 58px;
+}
+.allocate-worker .container-56 > .worker-option {
+  grid-row: auto;
+  grid-column: 1;
+  cursor: pointer;
+}

@@ -32,3 +32,84 @@ a {
     format("truetype");
 }
 
+/* 共用：日曆日期及頭像置中 */
+:is(
+  .owner-view .text-42,
+  .owner-view .text-45,
+  .worker-view .text-8,
+  .worker-view .text-12,
+  .owner-view-empty .text-8,
+  .owner-view-empty .text-10,
+  .owner-view-empty .text-11,
+  .allocate-worker .text-30,
+  .reallocate-worker .text-22,
+  .job-details-worker .text-9
+) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+}
+
+/* 共用：圓圈內文字 */
+:is(
+  .owner-view .text-42,
+  .owner-view .text-45,
+  .worker-view .text-8,
+  .worker-view .text-12,
+  .owner-view-empty .text-8,
+  .owner-view-empty .text-10,
+  .owner-view-empty .text-11,
+  .allocate-worker .text-30,
+  .reallocate-worker .text-22,
+  .job-details-worker .text-9
+) > div {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+/* 共用：日曆下方的工作狀態點 */
+:is(
+  .owner-view .text-44,
+  .worker-view .text-11,
+  .owner-view-empty .text-9
+) > div {
+  width: 7px !important;
+  height: 7px !important;
+  flex: 0 0 7px !important;
+  border-radius: 50% !important;
+}
+
+/* Shared Worker-selection circles: centre both initial and selected dots. */
+:is(
+  .allocate-worker .text-32,
+  .allocate-worker .text-34,
+  .reallocate-worker .text-24
+) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+:is(
+  .allocate-worker .text-32,
+  .allocate-worker .text-34,
+  .reallocate-worker .text-24
+) > :is(.text-33, .selected-radio-dot, .selected-dot) {
+  position: static !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 10px !important;
+  height: 10px !important;
+  flex: 0 0 10px !important;
+  border-radius: 50% !important;
+}

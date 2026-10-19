@@ -17,7 +17,7 @@
   <button
   class="button-54"
   type="button"
-  onclick="window.location.href='owner-view.html'"
+  onclick="window.location.href='/owner-view/owner-view.html'"
 >
   <div class="text-wrapper-109">‹</div>
 </button>
@@ -145,7 +145,7 @@
     window.location.href = `tel:${phoneNumber}`;
   }
 
-    let selectedWorker = 'Sarah Johnson';
+    let selectedWorker = '';
 
     function selectWorker(workerName, selectedElement) {
     selectedWorker = workerName;
@@ -188,6 +188,50 @@
       dot.style.backgroundColor = '#E07A4F';
 
       radioCircle.appendChild(dot);
+    }
+  }
+
+  async function loadActiveWorkers() {
+    const list = document.querySelector('.container-56');
+    const template = list.querySelector('.worker-option').cloneNode(true);
+    list.replaceChildren();
+    selectedWorker = '';
+    const message = document.createElement('p');
+    message.textContent = 'Loading workers…';
+    list.appendChild(message);
+
+    try {
+      const response = await fetch('/api/workers');
+      const workers = await response.json();
+      if (!response.ok) {
+        throw new Error(workers.message || 'Unable to load workers.');
+      }
+      const activeWorkers = workers.filter(worker => worker.isActive !== false);
+      list.replaceChildren();
+      if (!activeWorkers.length) {
+        message.textContent = 'No active workers available.';
+        list.appendChild(message);
+        return;
+      }
+
+      activeWorkers.forEach(worker => {
+        const option = template.cloneNode(true);
+        option.className = 'button-58 worker-option';
+        option.removeAttribute('onclick');
+        option.dataset.worker = worker.name;
+        option.querySelector('.text-wrapper-121').textContent = worker.name;
+        option.querySelector('.text-30 > div').textContent = worker.name
+          .split(' ').filter(Boolean).map(part => part[0]).join('').slice(0, 2).toUpperCase();
+        const originalDot = option.querySelector('.text-33');
+        if (originalDot) originalDot.remove();
+        option.style.border = '1px solid #E4D8D0';
+        option.style.boxShadow = 'none';
+        option.addEventListener('click', () => selectWorker(worker.name, option));
+        list.appendChild(option);
+      });
+    } catch (error) {
+      list.replaceChildren(message);
+      message.textContent = error.message || 'Unable to load workers.';
     }
   }
 
@@ -358,6 +402,7 @@
   }
 
   loadJobDetails();
+  loadActiveWorkers();
 </script>
 
 </body>

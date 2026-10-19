@@ -66,7 +66,15 @@
     });
   }
 
-  navHost.replaceWith(navigation);
+ const appFrame = navHost.closest(
+  '.owner-view, .worker-view > .div, .owner-view-empty .frame'
+);
+
+navHost.replaceWith(navigation);
+
+if (appFrame) {
+  appFrame.appendChild(navigation);
+}
   updateActiveNavigation();
   window.addEventListener('hashchange', updateActiveNavigation);
   window.addEventListener('popstate', updateActiveNavigation);

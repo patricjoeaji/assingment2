@@ -380,21 +380,7 @@
     const isFinished = document
       .querySelector('.reallocate-worker')
       .classList.contains('is-finished');
-    const workerOrder = [
-      'Sarah Johnson',
-      'Mike Lee',
-      'Emma Brown',
-      'James Wilson'
-    ];
-
-    const options = Array
-      .from(document.querySelectorAll('[data-worker]'))
-      .sort((first, second) => {
-        return (
-          workerOrder.indexOf(first.dataset.worker) -
-          workerOrder.indexOf(second.dataset.worker)
-        );
-      });
+    const options = Array.from(document.querySelectorAll('[data-worker]'));
 
     let nextRow = currentWorker ? 2 : 1;
 
@@ -414,6 +400,50 @@
       nextRow += 1;
     });
   }
+  async function loadActiveWorkerOptions(currentWorker) {
+    const list = document.querySelector('.container-46');
+    const template = list.querySelector('[data-worker]').cloneNode(true);
+    list.querySelectorAll('[data-worker]').forEach(option => option.remove());
+    selectedWorker = null;
+    const message = document.createElement('p');
+    message.className = 'worker-list-message';
+    message.textContent = 'Loading workers…';
+    list.appendChild(message);
+    try {
+      const response = await fetch('/api/workers');
+      const workers = await response.json();
+      if (!response.ok) throw new Error(workers.message || 'Unable to load workers.');
+      const activeWorkers = workers.filter(worker => worker.isActive !== false);
+      message.remove();
+      activeWorkers.forEach(worker => {
+        const option = template.cloneNode(true);
+        option.className = 'button-50 worker-option';
+        option.removeAttribute('onclick');
+        option.dataset.worker = worker.name;
+        option.querySelector('.text-wrapper-97').textContent = worker.name;
+        option.querySelector('.text-22 > div').textContent = getInitials(worker.name);
+        option.querySelector('.text-24').replaceChildren();
+        option.tabIndex = 0;
+        option.setAttribute('role', 'button');
+        option.addEventListener('click', () => selectWorker(option, worker.name));
+        option.addEventListener('keydown', event => {
+          if (['Enter', ' '].includes(event.key)) {
+            event.preventDefault(); selectWorker(option, worker.name);
+          }
+        });
+        list.appendChild(option);
+      });
+      if (!activeWorkers.some(worker => worker.name !== currentWorker)) {
+        message.textContent = 'No other active workers available.';
+        list.appendChild(message);
+      }
+      updateWorkerOptions(currentWorker);
+      adjustPageHeight();
+    } catch (error) {
+      message.textContent = error.message || 'Unable to load workers.';
+    }
+  }
+
   function callClient() {
     const phoneNumber = document
       .getElementById('clientPhone')
@@ -669,7 +699,11 @@
       currentWorkerRow.style.display =
         job.assignedWorker ? '' : 'none';
 
-           updateWorkerOptions(job.assignedWorker);
+      if (!isFinished && currentUser?.role === 'Owner') {
+        await loadActiveWorkerOptions(job.assignedWorker);
+      } else {
+        updateWorkerOptions(job.assignedWorker);
+      }
 
       document.getElementById('clientName').textContent =
         job.clientName || '';

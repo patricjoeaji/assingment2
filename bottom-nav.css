@@ -16,12 +16,22 @@
 
 .worker-view .app-bottom-nav,
 .owner-view .app-bottom-nav {
-  position: absolute;
+  position: relative;
   top: auto;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: auto;
+  left: auto;
+  right: auto;
   width: 100%;
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+.owner-view > .section-9,
+.worker-view > .div > .section {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
 }
 
 .app-bottom-nav-item {
@@ -78,5 +88,56 @@
 @media (prefers-reduced-motion: no-preference) {
   .app-bottom-nav-item {
     transition: color 120ms ease-out;
+  }
+}
+
+
+
+/* Empty Owner calendar uses the same frame-contained navigation layout. */
+.owner-view-empty .frame {
+  display: flex;
+  flex-direction: column;
+}
+.owner-view-empty .frame > .section {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 100%;
+  height: auto;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
+  box-sizing: border-box;
+}
+.owner-view-empty .frame > .app-bottom-nav {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  width: 100%;
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+/* Desktop retains the 393 x 852 phone preview; mobile follows the viewport. */
+@media (max-width: 600px) {
+  .owner-view,
+  .worker-view,
+  .owner-view-empty {
+    min-height: 0;
+    height: 100vh;
+    height: 100dvh;
+  }
+  .worker-view > .div,
+  .owner-view-empty > .frame {
+    height: 100%;
+    min-height: 0;
+  }
+  .owner-view,
+  .worker-view > .div,
+  .owner-view-empty > .frame {
+    border-radius: 0;
+    box-shadow: none;
   }
 }
