@@ -26,7 +26,14 @@ const multer = require('multer');
 const WorkerCreationService = require('./services/WorkerCreationService');
 const createWorkerHandler = require('./routes/createWorkerHandler');
 
+const WorkerStatusService = require('./services/WorkerStatusService');
+const createWorkerStatusHandler = require('./routes/createWorkerStatusHandler');
+
 const workerCreation = new WorkerCreationService();
+const workerStatus = new WorkerStatusService();
+const AccountManagementService = require('./services/AccountManagementService');
+const { createProfileHandler, createPasswordHandler } = require('./routes/accountManagementHandlers');
+const accountManagement = new AccountManagementService();
 
 const app = express();
 app.set('trust proxy', 1);
@@ -48,8 +55,6 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
   res.redirect('/login/login.html');
 });
-const jobUploadDirectory = path.join(__dirname, '.private-uploads', 'jobs');
-fs.mkdirSync(jobUploadDirectory, { recursive: true });
 
 
 const photoExtensions = {
@@ -617,30 +622,7 @@ app.get('/api/workers', requireOwner, async (req, res) => {
 
 app.post('/api/workers', requireOwner, createWorkerHandler(workerCreation, toPublicUser));
 
-app.patch('/api/workers/:id/status', requireOwner, async (req, res) => {
-  try {
-    if (typeof req.body.isActive !== 'boolean') {
-      return res.status(400).json({ message: 'A worker status is required.' });
-    }
-
-    const worker = await User.findOneAndUpdate(
-      { _id: req.params.id, role: 'Worker' },
-      { isActive: req.body.isActive },
-      { new: true, runValidators: true }
-    );
-
-    if (!worker) {
-      return res.status(404).json({ message: 'Worker not found.' });
-    }
-
-    res.json({
-      message: req.body.isActive ? 'Worker activated.' : 'Worker deactivated.',
-      worker: toPublicUser(worker)
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+app.patch('/api/workers/:id/status', requireOwner, createWorkerStatusHandler(workerStatus, toPublicUser));
 
 app.patch('/api/workers/:id/rate', requireOwner, async (req, res) => {
   try {
@@ -1539,76 +1521,8 @@ app.get('/api/completed-jobs/:id/photos/:filename', requireCompletedJobAccess, a
   }
 });
 
-app.put('/api/users/:id/profile', requireSelf, async (req, res) => {
-  try {
-    const name = String(req.body.name || '').trim();
-    const phone = String(req.body.phone || '').trim();
-    const email = String(req.body.email || '').trim().toLowerCase();
-
-    if (!name || !email) {
-      return res.status(400).json({
-        message: 'Name and email are required.'
-      });
-    }
-
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'Account not found.' });
-    }
-
-    user.name = name;
-    user.phone = phone;
-    user.email = email;
-    await user.save();
-
-    res.json({
-      message: 'Profile updated.',
-      user: toPublicUser(user)
-    });
-  } catch (error) {
-    if (error.code === 11000) {
-      return res.status(409).json({ message: 'That email is already in use.' });
-    }
-
-    res.status(400).json({ message: error.message });
-  }
-});
-
-app.put('/api/users/:id/password', requireSelf, async (req, res) => {
-  try {
-    const currentPassword = String(req.body.currentPassword || '');
-    const newPassword = String(req.body.newPassword || '');
-
-    if (!currentPassword || newPassword.length < 8) {
-      return res.status(400).json({
-        message: 'Enter your current password and a new password of at least 8 characters.'
-      });
-    }
-
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'Account not found.' });
-    }
-
-    const passwordMatches = await bcrypt.compare(
-      currentPassword,
-      user.password
-    );
-
-    if (!passwordMatches) {
-      return res.status(401).json({ message: 'Current password is incorrect.' });
-    }
-
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-
-    res.json({ message: 'Password updated.' });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+app.put('/api/users/:id/profile', requireSelf, createProfileHandler(accountManagement, toPublicUser));
+app.put('/api/users/:id/password', requireSelf, createPasswordHandler(accountManagement));
 
 // Create a new job
 app.post('/api/jobs', requireOwner, async (req, res) => {
