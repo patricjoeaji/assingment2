@@ -6,7 +6,8 @@
   "scripts": {
     "test:worker-creation": "node --test tests/worker-creation.test.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test:worker-status": "node --test tests/worker-status.test.js"
+    "test:worker-status": "node --test tests/worker-status.test.js",
+    "test:account-management": "node --test tests/account-management.test.js"
   },
   "repository": {
     "type": "git",

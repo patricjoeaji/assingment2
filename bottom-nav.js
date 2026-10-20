@@ -3,9 +3,6 @@
     '.navigation-6, .navigation-4, .navigation-5, .navigation-2, .navigation-3, .navigation'
   );
   if (!navHost) return;
-  document.body.classList.add('has-app-bottom-nav');
-  const viewport = document.querySelector('meta[name="viewport"]');
-  if (viewport && !viewport.content.includes('viewport-fit=')) viewport.content += ', viewport-fit=cover';
   const originalRect = navHost.getBoundingClientRect();
 
   let currentUser = null;
@@ -76,7 +73,6 @@
 navHost.replaceWith(navigation);
 
 if (appFrame) {
-  document.body.classList.add('has-nav-frame');
   appFrame.appendChild(navigation);
 }
   updateActiveNavigation();
