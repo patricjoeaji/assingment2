@@ -1,0 +1,42 @@
+name: Backend Functional Tests
+
+on:
+  push:
+    branches: [main, test/fr12-payroll-actions]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    name: FR-09 to FR-12 backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Australia/Brisbane
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        id: install
+        run: npm ci
+      - name: FR-09 Worker Creation
+        if: ${{ !cancelled() && success() }}
+        run: node --test --test-reporter=spec tests/worker-creation.test.js
+      - name: FR-10 Worker Status
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: node --test --test-reporter=spec tests/worker-status.test.js
+      - name: FR-11 Account Management
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: node --test --test-reporter=spec tests/account-management.test.js
+      - name: FR-12 Timesheets and Payslips
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run test:payroll
