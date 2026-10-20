@@ -141,3 +141,28 @@
     box-shadow: none;
   }
 }
+
+/* On phones, every shared navigation stays at the visible viewport bottom. */
+@media (max-width: 600px) {
+  .app-bottom-nav {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    width: min(393px, 100vw) !important;
+    margin: 0 !important;
+  }
+  .owner-view > .section-9,
+  .worker-view > .div > .section,
+  .owner-view-empty .frame > .section {
+    height: auto !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 24px) !important;
+  }
+  body.has-app-bottom-nav:not(.has-nav-frame) {
+    padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 24px);
+  }
+}

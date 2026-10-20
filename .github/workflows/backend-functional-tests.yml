@@ -1,4 +1,4 @@
-name: Backend Functional Tests
+name: Backend CI and EC2 CD
 
 on:
   push:
@@ -40,3 +40,31 @@ jobs:
       - name: FR-12 Timesheets and Payslips
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run test:payroll
+
+  deploy-ec2:
+    name: CD - Deploy to EC2
+    needs: backend-tests
+    if: >-
+      github.repository == 'Krisy-uni/assignment2-IFN636' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: [self-hosted, Linux, X64, jobflow-deploy]
+    timeout-minutes: 10
+    concurrency:
+      group: jobflow-ec2-deployment
+      cancel-in-progress: false
+    env:
+      APP_DIR: /home/ubuntu/assignment2-IFN636
+      APP_NAME: assignment2
+      PM2_HOME: /home/ubuntu/.pm2
+      HEALTH_URL: http://127.0.0.1:3000/login/login.html
+      DEPLOY_SHA: ${{ github.sha }}
+    steps:
+      - name: Check out tested commit in runner workspace
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Update application and restart PM2
+        shell: bash
+        run: bash scripts/deploy-ec2.sh
