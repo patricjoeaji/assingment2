@@ -925,3 +925,13 @@
 .reallocate-worker .reassign-send-offer {
   position: static;
 }
+
+/* Keep all active-worker choices inside the assignment card. */
+.reallocate-worker:not(.is-finished) .container-46 {
+  grid-template-rows: none;
+  grid-auto-rows: 58px;
+  max-height: 256px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.reallocate-worker .worker-list-message { grid-column: 1; font-size: 12px; }

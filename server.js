@@ -26,7 +26,11 @@ const multer = require('multer');
 const WorkerCreationService = require('./services/WorkerCreationService');
 const createWorkerHandler = require('./routes/createWorkerHandler');
 
+const WorkerStatusService = require('./services/WorkerStatusService');
+const createWorkerStatusHandler = require('./routes/createWorkerStatusHandler');
+
 const workerCreation = new WorkerCreationService();
+const workerStatus = new WorkerStatusService();
 
 const app = express();
 app.set('trust proxy', 1);
@@ -48,8 +52,6 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
   res.redirect('/login/login.html');
 });
-const jobUploadDirectory = path.join(__dirname, '.private-uploads', 'jobs');
-fs.mkdirSync(jobUploadDirectory, { recursive: true });
 
 
 const photoExtensions = {
@@ -617,30 +619,7 @@ app.get('/api/workers', requireOwner, async (req, res) => {
 
 app.post('/api/workers', requireOwner, createWorkerHandler(workerCreation, toPublicUser));
 
-app.patch('/api/workers/:id/status', requireOwner, async (req, res) => {
-  try {
-    if (typeof req.body.isActive !== 'boolean') {
-      return res.status(400).json({ message: 'A worker status is required.' });
-    }
-
-    const worker = await User.findOneAndUpdate(
-      { _id: req.params.id, role: 'Worker' },
-      { isActive: req.body.isActive },
-      { new: true, runValidators: true }
-    );
-
-    if (!worker) {
-      return res.status(404).json({ message: 'Worker not found.' });
-    }
-
-    res.json({
-      message: req.body.isActive ? 'Worker activated.' : 'Worker deactivated.',
-      worker: toPublicUser(worker)
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+app.patch('/api/workers/:id/status', requireOwner, createWorkerStatusHandler(workerStatus, toPublicUser));
 
 app.patch('/api/workers/:id/rate', requireOwner, async (req, res) => {
   try {
