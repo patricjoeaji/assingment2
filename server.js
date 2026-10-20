@@ -31,9 +31,6 @@ const createWorkerStatusHandler = require('./routes/createWorkerStatusHandler');
 
 const workerCreation = new WorkerCreationService();
 const workerStatus = new WorkerStatusService();
-const AccountManagementService = require('./services/AccountManagementService');
-const { createProfileHandler, createPasswordHandler } = require('./routes/accountManagementHandlers');
-const accountManagement = new AccountManagementService();
 
 const app = express();
 app.set('trust proxy', 1);
